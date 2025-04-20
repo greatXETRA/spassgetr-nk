@@ -5,3 +5,46 @@ html, body {
 canvas {
   display: block;
 }
+
+/* Hamburger Icon */
+.menu-toggle {
+    display: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: #FF9494;
+    padding: 10px 20px;
+    z-index: 100;
+}
+
+/* Standardmenü */
+.menu {
+    display: flex;
+    gap: 20px;
+}
+
+/* Mobilmenü (ausgeblendet) */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .menu {
+        flex-direction: column;
+        background-color: #FFD1D1;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        display: none;
+        padding: 10px 0;
+    }
+
+    .menu.active {
+        display: flex;
+    }
+
+    .menu a {
+        padding: 10px 20px;
+        font-size: 18px;
+    }
+}
