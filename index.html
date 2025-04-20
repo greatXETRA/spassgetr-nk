@@ -184,9 +184,19 @@
         }
 
         @media (max-width: 768px) {
-            .menu {
-                display: none;
-            }
+    .menu {
+        display: flex;
+        flex-direction: column;
+        background-color: #FFD1D1; /* Optional: Hintergrundfarbe fürs mobile Menü */
+        position: absolute;
+        top: 80px;
+        right: 20px;
+        padding: 10px;
+        border-radius: 10px;
+        z-index: 999;
+    }
+}
+
 
             .hero h1 {
                 font-size: 48px;
@@ -196,7 +206,7 @@
 </head>
 <body>
     <header>
-        <img src="spassgetraenk.png" alt="Logo" class="logo">
+      
         <nav class="menu">
             <a href="#">Produkte</a>
             <a href="#">Merch</a>
