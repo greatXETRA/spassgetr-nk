@@ -6,42 +6,53 @@ canvas {
   display: block;
 }
 
-/* Hamburger Icon */
-.menu-toggle {
-    display: none;
-    font-size: 30px;
-    cursor: pointer;
-    color: #FF9494;
-    padding: 10px 20px;
-    z-index: 100;
-}
-
-/* Standardmenü */
 .menu {
     display: flex;
     gap: 20px;
 }
 
-/* Mobilmenü (ausgeblendet) */
-@media (max-width: 768px) {
-    .menu-toggle {
-        display: block;
-    }
+.menu a {
+    color: #FF9494;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
 
+.menu a:hover {
+    color: #FFD1D1;
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #FF9494;
+}
+
+/* Mobile Menü */
+@media (max-width: 768px) {
     .menu {
+        display: none;
         flex-direction: column;
         background-color: #FFD1D1;
         position: absolute;
-        top: 60px;
-        left: 0;
-        width: 100%;
-        display: none;
-        padding: 10px 0;
+        top: 70px;
+        right: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        z-index: 1000;
     }
 
     .menu.active {
         display: flex;
     }
+
+    .menu-toggle {
+        display: block;
+    }
+}
+
 
     .menu a {
         padding: 10px 20px;
