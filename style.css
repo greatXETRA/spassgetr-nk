@@ -44,6 +44,14 @@ canvas {
         z-index: 1000;
     }
 
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+
     .menu.active {
         display: flex;
     }
@@ -51,7 +59,7 @@ canvas {
     .menu-toggle {
         display: block;
     }
-}
+
 
 
     .menu a {
