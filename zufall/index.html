@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Spaßgetränk Zufallsgenerator</title>
     <style>
         * {
@@ -10,6 +10,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -17,10 +18,11 @@
             color: #333;
             min-height: 100vh;
             overflow-x: hidden;
+            touch-action: manipulation;
         }
         
         .wave-container {
-            position: absolute;
+            position: fixed;
             width: 100%;
             height: 60vh;
             bottom: 0;
@@ -117,32 +119,35 @@
         }
         
         header {
-            padding: 1.5rem;
-            text-align: left;
+            padding: 1.5rem 1rem;
+            text-align: center;
         }
         
         h1 {
-            font-size: 3rem;
+            font-size: clamp(2rem, 8vw, 3rem);
             color: #FF9494;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
             margin-bottom: 0.5rem;
+            line-height: 1.2;
         }
         
         .container {
+            width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
             text-align: center;
             position: relative;
             z-index: 10;
+            padding-bottom: 5rem;
         }
         
         .drink-container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 1rem;
-            padding: 2rem;
+            padding: 2rem 1rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             min-height: 200px;
             display: flex;
             flex-direction: column;
@@ -151,13 +156,15 @@
         }
         
         .drink-name {
-            font-size: 2.5rem;
+            font-size: clamp(1.5rem, 6vw, 2.5rem);
             margin-bottom: 1rem;
             color: #FF9494;
+            text-align: center;
+            padding: 0 0.5rem;
         }
         
         .drink-emoji {
-            font-size: 4rem;
+            font-size: clamp(3rem, 12vw, 4rem);
             margin-bottom: 1rem;
             transition: transform 0.5s ease;
         }
@@ -173,6 +180,11 @@
             transition: all 0.3s ease;
             margin: 0.5rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            max-width: 300px;
         }
         
         .btn:hover {
@@ -205,23 +217,28 @@
         
         .action-buttons {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            width: 100%;
+            margin-bottom: 1.5rem;
         }
         
         .saved-drinks {
             margin-top: 2rem;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 1rem;
-            padding: 1.5rem;
+            padding: 1.5rem 1rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             display: none;
+            width: 100%;
         }
         
         .saved-drinks h2 {
             color: #FF9494;
             margin-bottom: 1rem;
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
         }
         
         .saved-drinks-list {
@@ -239,32 +256,108 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 0.9rem;
         }
         
         .saved-drink-item span {
             font-size: 1.5rem;
         }
         
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
+        /* Media queries for responsive design */
+        @media (min-width: 768px) {
+            header {
+                text-align: left;
+                padding: 1.5rem;
             }
             
             .container {
-                padding: 1rem;
+                padding: 2rem;
             }
             
-            .drink-name {
-                font-size: 2rem;
+            .drink-container {
+                padding: 2rem;
             }
             
             .action-buttons {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
             }
             
             .btn {
-                width: 100%;
-                margin-bottom: 0.5rem;
+                width: auto;
+            }
+        }
+        
+        /* Safari/iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .btn {
+                padding: 0.9rem 1.5rem; /* Slightly bigger touch target for iOS */
+            }
+            
+            /* Fix for iOS 100vh issue */
+            .wave-container {
+                height: 60vh; /* fallback */
+                height: calc(60 * var(--vh, 1vh));
+            }
+        }
+        
+        /* Toast notification system */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Loading animation */
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .loading div {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin: 0 5px;
+            border-radius: 50%;
+            background-color: #FF9494;
+            animation: loading 1.4s infinite ease-in-out both;
+        }
+        
+        .loading div:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading div:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes loading {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
             }
         }
     </style>
@@ -285,6 +378,11 @@
         <div class="drink-container">
             <div class="drink-emoji">🥤</div>
             <h2 class="drink-name">Drück auf den Button für ein zufälliges Getränk!</h2>
+            <div class="loading">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </div>
         
         <div class="action-buttons">
@@ -302,7 +400,18 @@
         </div>
     </div>
     
+    <div id="toast" class="toast"></div>
+    
     <script>
+        // Fix for 100vh in mobile browsers
+        function setVH() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        
+        setVH();
+        window.addEventListener('resize', setVH);
+        
         // Drink data
         const drinks = [
             { name: "Club Mate", emoji: "🧉" },
@@ -332,6 +441,8 @@
         const customBtn = document.getElementById('customBtn');
         const savedDrinks = document.getElementById('savedDrinks');
         const savedDrinksList = document.getElementById('savedDrinksList');
+        const loading = document.querySelector('.loading');
+        const toast = document.getElementById('toast');
         
         // Current drink
         let currentDrink = null;
@@ -345,28 +456,51 @@
             updateSavedDrinksList();
         }
         
-        // Generate random drink
-        function generateRandomDrink() {
-            const randomIndex = Math.floor(Math.random() * drinks.length);
-            currentDrink = drinks[randomIndex];
-            
-            drinkEmoji.textContent = currentDrink.emoji;
-            drinkName.textContent = currentDrink.name;
-            
-            // Enable buttons
-            shareBtn.disabled = false;
-            saveBtn.disabled = false;
-            
-            // Animation
-            drinkEmoji.style.transform = 'scale(0) rotate(-180deg)';
-            drinkName.style.transform = 'scale(0)';
+        // Show toast message
+        function showToast(message, duration = 2000) {
+            toast.textContent = message;
+            toast.classList.add('show');
             
             setTimeout(() => {
-                drinkEmoji.style.transform = 'scale(1) rotate(0deg)';
-                drinkName.style.transform = 'scale(1)';
-                drinkEmoji.style.transition = 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                drinkName.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            }, 100);
+                toast.classList.remove('show');
+            }, duration);
+        }
+        
+        // Generate random drink
+        function generateRandomDrink() {
+            // Show loading
+            drinkEmoji.style.display = 'none';
+            drinkName.style.display = 'none';
+            loading.style.display = 'block';
+            
+            // Simulate loading for better UX
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * drinks.length);
+                currentDrink = drinks[randomIndex];
+                
+                // Hide loading, show content
+                loading.style.display = 'none';
+                drinkEmoji.style.display = 'block';
+                drinkName.style.display = 'block';
+                
+                drinkEmoji.textContent = currentDrink.emoji;
+                drinkName.textContent = currentDrink.name;
+                
+                // Enable buttons
+                shareBtn.disabled = false;
+                saveBtn.disabled = false;
+                
+                // Animation
+                drinkEmoji.style.transform = 'scale(0) rotate(-180deg)';
+                drinkName.style.transform = 'scale(0)';
+                
+                setTimeout(() => {
+                    drinkEmoji.style.transform = 'scale(1) rotate(0deg)';
+                    drinkName.style.transform = 'scale(1)';
+                    drinkEmoji.style.transition = 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    drinkName.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                }, 50);
+            }, 600);
         }
         
         // Share functionality
@@ -381,11 +515,21 @@
                         console.log('Drink shared successfully');
                     }).catch((error) => {
                         console.log('Error sharing:', error);
-                        alert('Teilen per Link: ' + window.location.href);
+                        const shareUrl = `${window.location.href}?drink=${encodeURIComponent(currentDrink.name)}`;
+                        showToast(`Link kopiert: ${shareUrl}`);
+                        // Copy to clipboard fallback
+                        navigator.clipboard.writeText(shareUrl).catch(err => {
+                            console.error('Could not copy text: ', err);
+                        });
                     });
                 } else {
                     // Fallback for browsers that don't support navigator.share
-                    alert('Teilen per Link: ' + window.location.href);
+                    const shareUrl = `${window.location.href}?drink=${encodeURIComponent(currentDrink.name)}`;
+                    showToast(`Link kopiert: ${shareUrl}`);
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(shareUrl).catch(err => {
+                        console.error('Could not copy text: ', err);
+                    });
                 }
             }
         }
@@ -397,9 +541,9 @@
                 localStorage.setItem('savedDrinks', JSON.stringify(savedDrinksArray));
                 updateSavedDrinksList();
                 savedDrinks.style.display = 'block';
-                alert(`${currentDrink.name} wurde gespeichert!`);
+                showToast(`${currentDrink.name} wurde gespeichert!`);
             } else {
-                alert('Dieses Getränk hast du bereits gespeichert!');
+                showToast('Dieses Getränk hast du bereits gespeichert!');
             }
         }
         
@@ -411,10 +555,21 @@
         // Update saved drinks list
         function updateSavedDrinksList() {
             savedDrinksList.innerHTML = '';
-            savedDrinksArray.forEach(drink => {
+            savedDrinksArray.forEach((drink, index) => {
                 const drinkItem = document.createElement('div');
                 drinkItem.className = 'saved-drink-item';
                 drinkItem.innerHTML = `<span>${drink.emoji}</span> ${drink.name}`;
+                drinkItem.addEventListener('click', () => {
+                    currentDrink = drink;
+                    drinkEmoji.textContent = drink.emoji;
+                    drinkName.textContent = drink.name;
+                    shareBtn.disabled = false;
+                    // Animation
+                    drinkEmoji.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        drinkEmoji.style.transform = 'scale(1)';
+                    }, 50);
+                });
                 savedDrinksList.appendChild(drinkItem);
             });
         }
@@ -422,17 +577,54 @@
         // Create custom drink
         function createCustomDrink() {
             const customName = prompt('Gib deinem Getränk einen Namen:');
-            if (customName) {
+            if (customName && customName.trim() !== '') {
                 const emojis = ['🥤', '🧃', '🍹', '🍸', '🍷', '🍶', '🍵', '☕', '🧉', '🥛', '🍊', '🍋'];
                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                 
-                currentDrink = { name: customName, emoji: randomEmoji };
+                currentDrink = { name: customName.trim(), emoji: randomEmoji };
                 drinkEmoji.textContent = currentDrink.emoji;
                 drinkName.textContent = currentDrink.name;
                 
                 // Enable buttons
                 shareBtn.disabled = false;
                 saveBtn.disabled = false;
+                
+                // Animation
+                drinkEmoji.style.transform = 'scale(0)';
+                drinkName.style.transform = 'scale(0)';
+                
+                setTimeout(() => {
+                    drinkEmoji.style.transform = 'scale(1)';
+                    drinkName.style.transform = 'scale(1)';
+                }, 50);
+            }
+        }
+        
+        // Check for URL params (shared drink)
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const drinkParam = urlParams.get('drink');
+            
+            if (drinkParam) {
+                const foundDrink = drinks.find(d => d.name === drinkParam);
+                if (foundDrink) {
+                    currentDrink = foundDrink;
+                    drinkEmoji.textContent = foundDrink.emoji;
+                    drinkName.textContent = foundDrink.name;
+                    shareBtn.disabled = false;
+                    saveBtn.disabled = false;
+                    showToast('Geteiltes Getränk geladen!');
+                } else {
+                    // Create custom drink from shared link
+                    const emojis = ['🥤', '🧃', '🍹', '🍸', '🍷', '🍶', '🍵', '☕', '🧉', '🥛', '🍊', '🍋'];
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    currentDrink = { name: drinkParam, emoji: randomEmoji };
+                    drinkEmoji.textContent = currentDrink.emoji;
+                    drinkName.textContent = currentDrink.name;
+                    shareBtn.disabled = false;
+                    saveBtn.disabled = false;
+                    showToast('Geteiltes Getränk geladen!');
+                }
             }
         }
         
@@ -441,6 +633,21 @@
         shareBtn.addEventListener('click', shareDrink);
         saveBtn.addEventListener('click', saveDrink);
         customBtn.addEventListener('click', createCustomDrink);
+        
+        // Handle touch and click focus states
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+            
+            button.addEventListener('touchend', function() {
+                this.style.transform = '';
+            });
+        });
+        
+        // Check URL params on load
+        document.addEventListener('DOMContentLoaded', checkUrlParams);
     </script>
 </body>
 </html>
