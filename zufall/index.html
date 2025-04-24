@@ -5,25 +5,186 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Zufallsgetränk</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #FFF5F5;
+      color: #FF9494;
+    }
+
+    .circle-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: #FFD1D1;
+      opacity: 0.6;
+    }
+
+    .circle1 {
+      width: 300px;
+      height: 300px;
+      top: -50px;
+      left: -100px;
+    }
+
+    .circle2 {
+      width: 250px;
+      height: 250px;
+      top: 100px;
+      left: 100px;
+    }
+
+    .circle3 {
+      width: 400px;
+      height: 400px;
+      top: 250px;
+      left: -50px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #FF9494;
+    }
+
+    p {
+      font-size: 1.2rem;
+    }
+
+    button {
+      background-color: #FF9494;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #FFD1D1;
+    }
+
+    .box {
+      width: 150px;
+      height: 100px;
+      margin: 30px auto 10px;
+      position: relative;
+      transform-style: preserve-3d;
+      perspective: 800px;
+    }
+
+    .lid {
+      width: 150px;
+      height: 20px;
+      background-color: #FF9494;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 10px 10px 0 0;
+      transform-origin: top;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .body {
+      width: 150px;
+      height: 100px;
+      background-color: #FFD1D1;
+      border-radius: 0 0 10px 10px;
+      position: absolute;
+      top: 20px;
+      left: 0;
+    }
+
+    .box.open .lid {
+      transform: rotateX(-120deg);
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #FF9494;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .hidden {
+      opacity: 0;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="illustration">
-      <img src="illustration.png" alt="Illustration eines Hauses mit Herbstfarben">
-    </div>
-    <div class="content">
-      <h1>Zufallsgetränk</h1>
-      <p>Du weißt nicht, was du trinken sollst? Lass dich überraschen!</p>
-      <button id="generateButton">🥤 Jetzt Getränk wählen</button>
-
-      <div class="box" id="box">
-        <div class="lid" id="lid"></div>
-        <div class="body"></div>
-      </div>
-
-      <div id="result" class="hidden">...</div>
-    </div>
+  <div class="circle-bg">
+    <div class="circle circle1"></div>
+    <div class="circle circle2"></div>
+    <div class="circle circle3"></div>
   </div>
-  <script src="script.js"></script>
+  <div class="container">
+    <h1>Zufallsgetränk</h1>
+    <p>Du weißt nicht, was du trinken sollst? Lass dich überraschen!</p>
+    <button id="generateButton">🥤 Jetzt Getränk wählen</button>
+
+    <div class="box" id="box">
+      <div class="lid" id="lid"></div>
+      <div class="body"></div>
+    </div>
+
+    <div id="result" class="hidden">...</div>
+  </div>
+
+  <script>
+    const drinks = [
+      "Paulaner Spezi",
+      "Holunderschorle",
+      "Bananenweizen",
+      "Club Mate",
+      "Kalter Kaffee mit Vanille",
+      "Apfelsaftschorle",
+      "Ginger Ale mit Limette",
+      "Kirsch-Cola",
+      "Himbeerbrause",
+      "Kokoswasser"
+    ];
+
+    const button = document.getElementById("generateButton");
+    const result = document.getElementById("result");
+    const box = document.getElementById("box");
+
+    button.addEventListener("click", () => {
+      result.classList.add("hidden");
+      result.textContent = "";
+      box.classList.remove("open");
+
+      setTimeout(() => {
+        box.classList.add("open");
+        const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
+        result.textContent = `Dein Getränk: ${randomDrink}`;
+        result.classList.remove("hidden");
+      }, 300); // Sehr kurze Wartezeit für sofortiges Feedback
+    });
+  </script>
 </body>
 </html>
