@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zufallsgetränk</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zufallsgenerator Spaßgetränk</title>
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: sans-serif;
-      background-color: #FFF5F5;
-      color: #FF9494;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
 
-    .circle-bg {
+    body {
+      background-color: #FFF5E4;
+      overflow-x: hidden;
+      text-align: center;
+    }
+
+    .circle-waves {
       position: absolute;
       width: 100%;
-      height: 100%;
+      height: 100vh;
       overflow: hidden;
       top: 0;
       left: 0;
@@ -26,165 +31,136 @@
     .circle {
       position: absolute;
       border-radius: 50%;
-      background: #FFD1D1;
-      opacity: 0.6;
+      opacity: 0.3;
+      background-color: #FF9494;
+      animation: wave-move 6s infinite alternate ease-in-out;
     }
 
-    .circle1 {
+    .circle:nth-child(1) {
       width: 300px;
       height: 300px;
-      top: -50px;
+      top: 30%;
       left: -100px;
     }
 
-    .circle2 {
-      width: 250px;
-      height: 250px;
-      top: 100px;
-      left: 100px;
-    }
-
-    .circle3 {
+    .circle:nth-child(2) {
       width: 400px;
       height: 400px;
-      top: 250px;
-      left: -50px;
+      top: 50%;
+      left: 0;
+      background-color: #FFD1D1;
+    }
+
+    .circle:nth-child(3) {
+      width: 300px;
+      height: 300px;
+      top: 60%;
+      left: 150px;
+      background-color: #FFE3E1;
+    }
+
+    .circle:nth-child(4) {
+      width: 350px;
+      height: 350px;
+      top: 70%;
+      left: 400px;
+      background-color: #FF9494;
+    }
+
+    @keyframes wave-move {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-20px); }
     }
 
     .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
       position: relative;
-      text-align: center;
+      padding-top: 200px;
     }
 
-    h1 {
-      font-size: 3rem;
+    .box {
+      width: 150px;
+      height: 150px;
+      background-color: #FFD1D1;
+      border: 4px solid #FF9494;
+      margin: 0 auto;
+      border-radius: 15px;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .box.open {
+      animation: openBox 0.3s forwards;
+    }
+
+    @keyframes openBox {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1) rotateX(180deg); }
+    }
+
+    .result {
+      font-size: 28px;
       color: #FF9494;
-    }
-
-    p {
-      font-size: 1.2rem;
+      margin-top: 20px;
+      font-weight: bold;
     }
 
     button {
+      margin-top: 40px;
+      padding: 12px 30px;
+      font-size: 18px;
       background-color: #FF9494;
       color: white;
       border: none;
-      padding: 15px 25px;
-      font-size: 1rem;
       border-radius: 10px;
       cursor: pointer;
-      margin-top: 20px;
       transition: background-color 0.3s;
     }
 
     button:hover {
       background-color: #FFD1D1;
     }
-
-    .box {
-      width: 150px;
-      height: 100px;
-      margin: 30px auto 10px;
-      position: relative;
-      transform-style: preserve-3d;
-      perspective: 800px;
-    }
-
-    .lid {
-      width: 150px;
-      height: 20px;
-      background-color: #FF9494;
-      position: absolute;
-      top: 0;
-      left: 0;
-      border-radius: 10px 10px 0 0;
-      transform-origin: top;
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .body {
-      width: 150px;
-      height: 100px;
-      background-color: #FFD1D1;
-      border-radius: 0 0 10px 10px;
-      position: absolute;
-      top: 20px;
-      left: 0;
-    }
-
-    .box.open .lid {
-      transform: rotateX(-120deg);
-    }
-
-    #result {
-      margin-top: 20px;
-      font-size: 1.4em;
-      font-weight: bold;
-      color: #FF9494;
-      opacity: 1;
-      transition: opacity 0.3s ease;
-    }
-
-    .hidden {
-      opacity: 0;
-    }
   </style>
 </head>
 <body>
-  <div class="circle-bg">
-    <div class="circle circle1"></div>
-    <div class="circle circle2"></div>
-    <div class="circle circle3"></div>
+  <div class="circle-waves">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
   </div>
+
   <div class="container">
-    <h1>Zufallsgetränk</h1>
-    <p>Du weißt nicht, was du trinken sollst? Lass dich überraschen!</p>
-    <button id="generateButton">🥤 Jetzt Getränk wählen</button>
-
-    <div class="box" id="box">
-      <div class="lid" id="lid"></div>
-      <div class="body"></div>
-    </div>
-
-    <div id="result" class="hidden">...</div>
+    <div class="box" id="box"></div>
+    <div class="result" id="result"></div>
+    <button onclick="generateDrink()">Was soll ich trinken?</button>
   </div>
 
   <script>
     const drinks = [
       "Paulaner Spezi",
       "Holunderschorle",
-      "Bananenweizen",
-      "Club Mate",
-      "Kalter Kaffee mit Vanille",
-      "Apfelsaftschorle",
-      "Ginger Ale mit Limette",
-      "Kirsch-Cola",
-      "Himbeerbrause",
-      "Kokoswasser"
+      "Ginger Ale",
+      "Bionade Holunder",
+      "Mate-Tee",
+      "Rhabarberschorle",
+      "Zitronenlimo",
+      "Pfirsicheistee"
     ];
 
-    const button = document.getElementById("generateButton");
-    const result = document.getElementById("result");
-    const box = document.getElementById("box");
+    function generateDrink() {
+      const box = document.getElementById("box");
+      const result = document.getElementById("result");
 
-    button.addEventListener("click", () => {
-      result.classList.add("hidden");
-      result.textContent = "";
       box.classList.remove("open");
+      result.textContent = "";
 
       setTimeout(() => {
         box.classList.add("open");
         const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
-        result.textContent = `Dein Getränk: ${randomDrink}`;
-        result.classList.remove("hidden");
-      }, 300); // Sehr kurze Wartezeit für sofortiges Feedback
-    });
+        result.textContent = randomDrink;
+      }, 300);
+    }
   </script>
 </body>
 </html>
