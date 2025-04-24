@@ -22,58 +22,97 @@
         .wave-container {
             position: absolute;
             width: 100%;
-            height: 50vh;
+            height: 60vh;
             bottom: 0;
             left: 0;
             z-index: -1;
+            overflow: hidden;
         }
         
         .wave {
             position: absolute;
-            width: 100%;
-            height: 25%;
+            width: 200%;
+            height: 100%;
             bottom: 0;
             left: 0;
-            background: transparent;
+            background: transparent; 
         }
         
         .wave-1 {
-            bottom: 0%;
-            background: #FF9494;
-            border-radius: 100% 100% 0 0;
-            animation: wave-animation 8s infinite linear;
+            bottom: -10%;
+            height: 35%;
+            background-color: #FF9494;
+            border-radius: 1000% 1000% 0 0;
+            animation: wave-animation-1 15s infinite ease-in-out;
         }
         
         .wave-2 {
-            bottom: 5%;
-            background: #FFD1D1;
-            border-radius: 100% 100% 0 0;
-            animation: wave-animation 7s infinite linear;
+            bottom: -30%;
+            height: 45%;
+            background-color: #FFD1D1;
+            border-radius: 800% 800% 0 0;
+            animation: wave-animation-2 17s infinite ease-in-out;
         }
         
         .wave-3 {
-            bottom: 10%;
-            background: #FFE3E1;
-            border-radius: 100% 100% 0 0;
-            animation: wave-animation 6s infinite linear;
+            bottom: -50%;
+            height: 55%;
+            background-color: #FFE3E1;
+            border-radius: 600% 600% 0 0;
+            animation: wave-animation-3 20s infinite ease-in-out;
         }
         
-        .wave-4 {
-            bottom: 15%;
-            background: #FFF5E4;
-            border-radius: 80% 80% 0 0;
-            animation: wave-animation 5s infinite linear;
-        }
-        
-        @keyframes wave-animation {
+        @keyframes wave-animation-1 {
             0% {
-                transform: translateX(-25%) scaleY(1);
+                transform: translateX(-50%) scaleY(1);
+            }
+            25% {
+                transform: translateX(-25%) scaleY(0.8);
             }
             50% {
-                transform: translateX(0%) scaleY(0.85);
+                transform: translateX(0%) scaleY(1.1);
+            }
+            75% {
+                transform: translateX(-25%) scaleY(0.9);
             }
             100% {
-                transform: translateX(-25%) scaleY(1);
+                transform: translateX(-50%) scaleY(1);
+            }
+        }
+        
+        @keyframes wave-animation-2 {
+            0% {
+                transform: translateX(-40%) scaleY(0.9);
+            }
+            25% {
+                transform: translateX(-20%) scaleY(1.1);
+            }
+            50% {
+                transform: translateX(0%) scaleY(0.8);
+            }
+            75% {
+                transform: translateX(-20%) scaleY(1);
+            }
+            100% {
+                transform: translateX(-40%) scaleY(0.9);
+            }
+        }
+        
+        @keyframes wave-animation-3 {
+            0% {
+                transform: translateX(-30%) scaleY(1.1);
+            }
+            25% {
+                transform: translateX(-15%) scaleY(0.9);
+            }
+            50% {
+                transform: translateX(0%) scaleY(1);
+            }
+            75% {
+                transform: translateX(-15%) scaleY(1.2);
+            }
+            100% {
+                transform: translateX(-30%) scaleY(1.1);
             }
         }
         
@@ -120,6 +159,7 @@
         .drink-emoji {
             font-size: 4rem;
             margin-bottom: 1rem;
+            transition: transform 0.5s ease;
         }
         
         .btn {
@@ -231,7 +271,6 @@
 </head>
 <body>
     <div class="wave-container">
-        <div class="wave wave-4"></div>
         <div class="wave wave-3"></div>
         <div class="wave wave-2"></div>
         <div class="wave wave-1"></div>
@@ -319,14 +358,14 @@
             saveBtn.disabled = false;
             
             // Animation
-            drinkEmoji.style.transform = 'scale(0)';
+            drinkEmoji.style.transform = 'scale(0) rotate(-180deg)';
             drinkName.style.transform = 'scale(0)';
             
             setTimeout(() => {
-                drinkEmoji.style.transform = 'scale(1)';
+                drinkEmoji.style.transform = 'scale(1) rotate(0deg)';
                 drinkName.style.transform = 'scale(1)';
-                drinkEmoji.style.transition = 'transform 0.5s ease';
-                drinkName.style.transition = 'transform 0.5s ease';
+                drinkEmoji.style.transition = 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                drinkName.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
             }, 100);
         }
         
