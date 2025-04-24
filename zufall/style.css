@@ -1,1 +1,60 @@
+body {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background: linear-gradient(to right, #fbeee6, #fad4c0);
+  color: #3a2e2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.hero {
+  text-align: center;
+  padding: 30px;
+  background-color: #fff8f0;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.1);
+  max-width: 500px;
+}
+
+h1 {
+  font-family: 'Brush Script MT', cursive;
+  font-size: 3em;
+  margin-bottom: 10px;
+  color: #e86b4d;
+}
+
+p {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #ff924c;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2em;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #ffb07c;
+}
+
+#result {
+  margin-top: 30px;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #e86b4d;
+  transition: opacity 0.3s ease;
+}
+
+.hidden {
+  opacity: 0;
+}
 
