@@ -1,13 +1,13 @@
 const drinks = [
   "Paulaner Spezi",
   "Holunderschorle",
-  "Bananenweizen",
+  "Kirsch-Banane",
   "Club Mate",
-  "Kalter Kaffee mit Vanille",
-  "Apfelsaftschorle",
-  "Ginger Ale mit Limette",
+  "Apfelschorle",
+  "Skiwasser",
+  "Ginger Ale",
   "Kirsch-Cola",
-  "Himbeerbrause",
+  "Ahoj-Brause",
   "Kokoswasser"
 ];
 
@@ -17,10 +17,10 @@ const result = document.getElementById("result");
 button.addEventListener("click", () => {
   result.classList.add("hidden");
   result.textContent = "Zufall wird generiert...";
-  
+
   setTimeout(() => {
     const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
-    result.textContent = `Heute trinkst du: ${randomDrink}!`;
+    result.textContent = `Dein Getränk: ${randomDrink}`;
     result.classList.remove("hidden");
-  }, 3000);
+  }, 1000); // 1 Sekunde
 });
