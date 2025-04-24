@@ -1,132 +1,407 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="stylesheet" href="style.css">
-
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zufallsgenerator Spaßgetränk</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background-color: #EBE8DB;
-      overflow-x: hidden;
-      text-align: center;
-      position: relative;
-      min-height: 100vh;
-    }
-
-    .wave-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: -1;
-    }
-
-    .wave-container svg {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .container {
-      position: relative;
-      padding-top: 180px;
-    }
-
-    .box {
-      width: 150px;
-      height: 150px;
-      background-color: #D76C82;
-      border: 4px solid #B03052;
-      margin: 0 auto;
-      border-radius: 15px;
-      transition: transform 0.3s ease;
-      backface-visibility: hidden;
-    }
-
-    .box.open {
-      animation: openBox 0.3s forwards;
-    }
-
-    @keyframes openBox {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1) rotateX(180deg); }
-    }
-
-    .result {
-      font-size: 28px;
-      color: #3D0301;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-
-    button {
-      margin-top: 40px;
-      padding: 12px 30px;
-      font-size: 18px;
-      background-color: #B03052;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #D76C82;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaßgetränk Zufallsgenerator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #FFF5E4;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .wave-container {
+            position: absolute;
+            width: 100%;
+            height: 50vh;
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 25%;
+            bottom: 0;
+            left: 0;
+            background: transparent;
+        }
+        
+        .wave-1 {
+            bottom: 0%;
+            background: #FF9494;
+            border-radius: 100% 100% 0 0;
+            animation: wave-animation 8s infinite linear;
+        }
+        
+        .wave-2 {
+            bottom: 5%;
+            background: #FFD1D1;
+            border-radius: 100% 100% 0 0;
+            animation: wave-animation 7s infinite linear;
+        }
+        
+        .wave-3 {
+            bottom: 10%;
+            background: #FFE3E1;
+            border-radius: 100% 100% 0 0;
+            animation: wave-animation 6s infinite linear;
+        }
+        
+        .wave-4 {
+            bottom: 15%;
+            background: #FFF5E4;
+            border-radius: 80% 80% 0 0;
+            animation: wave-animation 5s infinite linear;
+        }
+        
+        @keyframes wave-animation {
+            0% {
+                transform: translateX(-25%) scaleY(1);
+            }
+            50% {
+                transform: translateX(0%) scaleY(0.85);
+            }
+            100% {
+                transform: translateX(-25%) scaleY(1);
+            }
+        }
+        
+        header {
+            padding: 1.5rem;
+            text-align: left;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            color: #FF9494;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.5rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .drink-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .drink-name {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #FF9494;
+        }
+        
+        .drink-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            background-color: #FF9494;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.2rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            background-color: #FFD1D1;
+            color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background-color: #FF9494;
+        }
+        
+        .btn-secondary {
+            background-color: #FFD1D1;
+            color: #333;
+        }
+        
+        .btn:disabled {
+            background-color: #FFE3E1;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .saved-drinks {
+            margin-top: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .saved-drinks h2 {
+            color: #FF9494;
+            margin-bottom: 1rem;
+        }
+        
+        .saved-drinks-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .saved-drink-item {
+            background-color: #FFF5E4;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .saved-drink-item span {
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .drink-name {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- SVG-Wellen-Hintergrund -->
-  <div class="wave-container">
-    <svg viewBox="0 0 1440 320">
-      <path fill="#D76C82" fill-opacity="1" d="M0,160L60,165.3C120,171,240,181,360,192C480,203,600,213,720,197.3C840,181,960,139,1080,138.7C1200,139,1320,181,1380,202.7L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
-      <path fill="#B03052" fill-opacity="1" d="M0,224L60,202.7C120,181,240,139,360,133.3C480,128,600,160,720,170.7C840,181,960,171,1080,154.7C1200,139,1320,117,1380,106.7L1440,96L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
-      <path fill="#3D0301" fill-opacity="1" d="M0,288L60,266.7C120,245,240,203,360,176C480,149,600,139,720,138.7C840,139,960,149,1080,144C1200,139,1320,117,1380,106.7L1440,96L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
-    </svg>
-  </div>
-
-  <div class="container">
-    <div class="box" id="box"></div>
-    <div class="result" id="result"></div>
-    <button onclick="generateDrink()">Was soll ich trinken?</button>
-  </div>
-
-  <script>
-    const drinks = [
-      "Paulaner Spezi",
-      "Holunderschorle",
-      "Ginger Ale",
-      "Bionade Holunder",
-      "Mate-Tee",
-      "Rhabarberschorle",
-      "Zitronenlimo",
-      "Pfirsicheistee"
-    ];
-
-    function generateDrink() {
-      const box = document.getElementById("box");
-      const result = document.getElementById("result");
-
-      box.classList.remove("open");
-      result.textContent = "";
-
-      setTimeout(() => {
-        box.classList.add("open");
-        const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
-        result.textContent = randomDrink;
-      }, 300);
-    }
-  </script>
+    <div class="wave-container">
+        <div class="wave wave-4"></div>
+        <div class="wave wave-3"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-1"></div>
+    </div>
+    
+    <header>
+        <h1>Spaßgetränk Zufallsgenerator</h1>
+        <p>Finde dein neues Lieblingsgetränk</p>
+    </header>
+    
+    <div class="container">
+        <div class="drink-container">
+            <div class="drink-emoji">🥤</div>
+            <h2 class="drink-name">Drück auf den Button für ein zufälliges Getränk!</h2>
+        </div>
+        
+        <div class="action-buttons">
+            <button id="generateBtn" class="btn btn-primary">Getränk würfeln!</button>
+            <button id="shareBtn" class="btn btn-secondary" disabled>Teilen</button>
+            <button id="saveBtn" class="btn btn-secondary" disabled>Speichern</button>
+            <button id="customBtn" class="btn btn-secondary">Eigenes Getränk</button>
+        </div>
+        
+        <div id="savedDrinks" class="saved-drinks">
+            <h2>Deine gespeicherten Getränke</h2>
+            <div id="savedDrinksList" class="saved-drinks-list">
+                <!-- Saved drinks will be added here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Drink data
+        const drinks = [
+            { name: "Club Mate", emoji: "🧉" },
+            { name: "Skiwasser", emoji: "🏂" },
+            { name: "Holder", emoji: "🌱" },
+            { name: "Blaue Limette", emoji: "🔵" },
+            { name: "Verrückter Pfirsich", emoji: "🍑" },
+            { name: "Himbeer-Sprudel", emoji: "🍓" },
+            { name: "Kokosnuss-Traum", emoji: "🥥" },
+            { name: "Zitronen-Explosion", emoji: "🍋" },
+            { name: "Ananas-Spritzer", emoji: "🍍" },
+            { name: "Orangen-Feuer", emoji: "🍊" },
+            { name: "Waldbeeren-Mix", emoji: "🌳" },
+            { name: "Bananen-Flip", emoji: "🍌" },
+            { name: "Erdbeer-Vanille", emoji: "🍓" },
+            { name: "Grüner Apfel", emoji: "🍏" },
+            { name: "Wassermelonen-Splash", emoji: "🍉" },
+            { name: "Kirsch-Cola", emoji: "🍒" }
+        ];
+        
+        // Get elements
+        const drinkEmoji = document.querySelector('.drink-emoji');
+        const drinkName = document.querySelector('.drink-name');
+        const generateBtn = document.getElementById('generateBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const customBtn = document.getElementById('customBtn');
+        const savedDrinks = document.getElementById('savedDrinks');
+        const savedDrinksList = document.getElementById('savedDrinksList');
+        
+        // Current drink
+        let currentDrink = null;
+        
+        // Saved drinks array
+        let savedDrinksArray = JSON.parse(localStorage.getItem('savedDrinks')) || [];
+        
+        // Initialize saved drinks
+        if (savedDrinksArray.length > 0) {
+            savedDrinks.style.display = 'block';
+            updateSavedDrinksList();
+        }
+        
+        // Generate random drink
+        function generateRandomDrink() {
+            const randomIndex = Math.floor(Math.random() * drinks.length);
+            currentDrink = drinks[randomIndex];
+            
+            drinkEmoji.textContent = currentDrink.emoji;
+            drinkName.textContent = currentDrink.name;
+            
+            // Enable buttons
+            shareBtn.disabled = false;
+            saveBtn.disabled = false;
+            
+            // Animation
+            drinkEmoji.style.transform = 'scale(0)';
+            drinkName.style.transform = 'scale(0)';
+            
+            setTimeout(() => {
+                drinkEmoji.style.transform = 'scale(1)';
+                drinkName.style.transform = 'scale(1)';
+                drinkEmoji.style.transition = 'transform 0.5s ease';
+                drinkName.style.transition = 'transform 0.5s ease';
+            }, 100);
+        }
+        
+        // Share functionality
+        function shareDrink() {
+            if (currentDrink) {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Schau mal, was für ein cooles Getränk!',
+                        text: `Ich habe "${currentDrink.name}" ${currentDrink.emoji} beim Spaßgetränk Zufallsgenerator gefunden!`,
+                        url: window.location.href
+                    }).then(() => {
+                        console.log('Drink shared successfully');
+                    }).catch((error) => {
+                        console.log('Error sharing:', error);
+                        alert('Teilen per Link: ' + window.location.href);
+                    });
+                } else {
+                    // Fallback for browsers that don't support navigator.share
+                    alert('Teilen per Link: ' + window.location.href);
+                }
+            }
+        }
+        
+        // Save functionality
+        function saveDrink() {
+            if (currentDrink && !isDrinkSaved(currentDrink)) {
+                savedDrinksArray.push(currentDrink);
+                localStorage.setItem('savedDrinks', JSON.stringify(savedDrinksArray));
+                updateSavedDrinksList();
+                savedDrinks.style.display = 'block';
+                alert(`${currentDrink.name} wurde gespeichert!`);
+            } else {
+                alert('Dieses Getränk hast du bereits gespeichert!');
+            }
+        }
+        
+        // Check if drink is already saved
+        function isDrinkSaved(drink) {
+            return savedDrinksArray.some(item => item.name === drink.name);
+        }
+        
+        // Update saved drinks list
+        function updateSavedDrinksList() {
+            savedDrinksList.innerHTML = '';
+            savedDrinksArray.forEach(drink => {
+                const drinkItem = document.createElement('div');
+                drinkItem.className = 'saved-drink-item';
+                drinkItem.innerHTML = `<span>${drink.emoji}</span> ${drink.name}`;
+                savedDrinksList.appendChild(drinkItem);
+            });
+        }
+        
+        // Create custom drink
+        function createCustomDrink() {
+            const customName = prompt('Gib deinem Getränk einen Namen:');
+            if (customName) {
+                const emojis = ['🥤', '🧃', '🍹', '🍸', '🍷', '🍶', '🍵', '☕', '🧉', '🥛', '🍊', '🍋'];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                currentDrink = { name: customName, emoji: randomEmoji };
+                drinkEmoji.textContent = currentDrink.emoji;
+                drinkName.textContent = currentDrink.name;
+                
+                // Enable buttons
+                shareBtn.disabled = false;
+                saveBtn.disabled = false;
+            }
+        }
+        
+        // Event listeners
+        generateBtn.addEventListener('click', generateRandomDrink);
+        shareBtn.addEventListener('click', shareDrink);
+        saveBtn.addEventListener('click', saveDrink);
+        customBtn.addEventListener('click', createCustomDrink);
+    </script>
 </body>
 </html>
