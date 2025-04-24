@@ -1,25 +1,19 @@
-<!-- /zufall/index.html -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Zufallsseite</title>
-    <style>
-        body {
-            background-color: #FFE3E1;
-            font-family: Arial, sans-serif;
-            color: #FF9494;
-            text-align: center;
-            padding: 100px;
-        }
-        h1 {
-            font-size: 48px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zufallsgetränk Generator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>🎲 Willkommen auf der Zufallsseite!</h1>
-    <p>Hier ist Platz für besondere Aktionen oder coole Überraschungen.</p>
-    <a href="/">Zurück zur Startseite</a>
+  <div class="hero">
+    <h1>Zufallsgetränk Generator</h1>
+    <p>Drücke den Button und wir sagen dir, was du heute trinken sollst!</p>
+    <button id="generateButton">🥤 Getränk generieren</button>
+    <div id="result" class="hidden">...</div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
