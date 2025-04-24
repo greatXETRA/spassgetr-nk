@@ -1,26 +1,31 @@
 const drinks = [
   "Paulaner Spezi",
   "Holunderschorle",
-  "Kirsch-Banane",
+  "Bananenweizen",
   "Club Mate",
-  "Apfelschorle",
-  "Skiwasser",
-  "Ginger Ale",
+  "Kalter Kaffee mit Vanille",
+  "Apfelsaftschorle",
+  "Ginger Ale mit Limette",
   "Kirsch-Cola",
-  "Ahoj-Brause",
+  "Himbeerbrause",
   "Kokoswasser"
 ];
 
 const button = document.getElementById("generateButton");
 const result = document.getElementById("result");
+const box = document.getElementById("box");
 
 button.addEventListener("click", () => {
   result.classList.add("hidden");
-  result.textContent = "Zufall wird generiert...";
+  result.textContent = "";
+  box.classList.remove("open");
 
+  // Starte nach 1 Sekunde die Box-Animation und zeige das Getränk
   setTimeout(() => {
+    box.classList.add("open");
+
     const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
     result.textContent = `Dein Getränk: ${randomDrink}`;
     result.classList.remove("hidden");
-  }, 1000); // 1 Sekunde
+  }, 1000);
 });
