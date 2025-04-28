@@ -263,6 +263,57 @@
             font-size: 1.5rem;
         }
         
+        /* Filter options */
+        .filter-options {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            padding: 1.5rem 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-title {
+            color: #FF9494;
+            margin-bottom: 1rem;
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-btn {
+            background-color: #FFE3E1;
+            color: #333;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-btn.active {
+            background-color: #FF9494;
+            color: white;
+        }
+        
+        /* Badge for alcoholic drinks */
+        .alcohol-badge {
+            display: inline-block;
+            background-color: #FF9494;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        
         /* Media queries for responsive design */
         @media (min-width: 768px) {
             header {
@@ -375,6 +426,15 @@
     </header>
     
     <div class="container">
+        <div class="filter-options">
+            <h3 class="filter-title">Was darf's sein?</h3>
+            <div class="filter-buttons">
+                <button id="filterAll" class="filter-btn active">Alle Getränke</button>
+                <button id="filterNonAlcoholic" class="filter-btn">Ohne Alkohol</button>
+                <button id="filterAlcoholic" class="filter-btn">Mit Alkohol</button>
+            </div>
+        </div>
+        
         <div class="drink-container">
             <div class="drink-emoji">🥤</div>
             <h2 class="drink-name">Drück auf den Button für ein zufälliges Getränk!</h2>
@@ -413,24 +473,36 @@
         window.addEventListener('resize', setVH);
         
         // Drink data
-      const drinks = [
-    { name: "Club Mate", emoji: "🧉" },
-    { name: "Fritz-Kola", emoji: "⚡" },
-    { name: "Bionade", emoji: "🌱" },
-    { name: "Almdudler", emoji: "🌿" },
-    { name: "Capri-Sun", emoji: "🧃" },
-    { name: "Vöslauer Balance Juicy", emoji: "💧" },
-    { name: "Fanta Exotic", emoji: "🌴" },
-    { name: "Spezi", emoji: "🌞" },
-    { name: "Arizona Iced Tea", emoji: "🧊" },
-    { name: "Thomas Henry", emoji: "🥂" },
-    { name: "Skiwasser", emoji: "🏂" },
-    { name: "Apfelschorle", emoji: "🍏" },
-    { name: "KiBa", emoji: "🍌" },
-    { name: "Holunderschorle", emoji: "🌸" },
-    { name: "Gurkenlimonade", emoji: "🥒" },
-    { name: "Kaffee Tonic", emoji: "☕" }
-];
+        const nonAlcoholicDrinks = [
+            { name: "Club Mate", emoji: "🧉", alcoholic: false },
+            { name: "Fritz-Kola", emoji: "⚡", alcoholic: false },
+            { name: "Bionade", emoji: "🌱", alcoholic: false },
+            { name: "Almdudler", emoji: "🌿", alcoholic: false },
+            { name: "Capri-Sun", emoji: "🧃", alcoholic: false },
+            { name: "Vöslauer Balance Juicy", emoji: "💧", alcoholic: false },
+            { name: "Fanta Exotic", emoji: "🌴", alcoholic: false },
+            { name: "Spezi", emoji: "🌞", alcoholic: false },
+            { name: "Arizona Iced Tea", emoji: "🧊", alcoholic: false },
+            { name: "Thomas Henry", emoji: "🥂", alcoholic: false },
+            { name: "Skiwasser", emoji: "🏂", alcoholic: false },
+            { name: "Apfelschorle", emoji: "🍏", alcoholic: false },
+            { name: "KiBa", emoji: "🍌", alcoholic: false },
+            { name: "Holunderschorle", emoji: "🌸", alcoholic: false },
+            { name: "Gurkenlimonade", emoji: "🥒", alcoholic: false },
+            { name: "Kaffee Tonic", emoji: "☕", alcoholic: false }
+        ];
+        
+        const alcoholicDrinks = [
+            { name: "Sekt Mate", emoji: "🍾", alcoholic: true },
+            { name: "Meister Meister", emoji: "🍻", alcoholic: true },
+            { name: "Discoschorle", emoji: "💃", alcoholic: true }
+        ];
+        
+        // Combine drink arrays
+        const allDrinks = [...nonAlcoholicDrinks, ...alcoholicDrinks];
+        
+        // Current filter - start with all drinks
+        let currentDrinks = allDrinks;
         
         // Get elements
         const drinkEmoji = document.querySelector('.drink-emoji');
@@ -443,6 +515,11 @@
         const savedDrinksList = document.getElementById('savedDrinksList');
         const loading = document.querySelector('.loading');
         const toast = document.getElementById('toast');
+        
+        // Filter buttons
+        const filterAll = document.getElementById('filterAll');
+        const filterNonAlcoholic = document.getElementById('filterNonAlcoholic');
+        const filterAlcoholic = document.getElementById('filterAlcoholic');
         
         // Current drink
         let currentDrink = null;
@@ -466,6 +543,29 @@
             }, duration);
         }
         
+        // Handle filter change
+        function changeFilter(filter) {
+            // Remove active class from all filter buttons
+            filterAll.classList.remove('active');
+            filterNonAlcoholic.classList.remove('active');
+            filterAlcoholic.classList.remove('active');
+            
+            // Set active class on clicked button
+            filter.classList.add('active');
+            
+            // Set current drinks array based on filter
+            if (filter === filterAll) {
+                currentDrinks = allDrinks;
+                showToast('Alle Getränke ausgewählt');
+            } else if (filter === filterNonAlcoholic) {
+                currentDrinks = nonAlcoholicDrinks;
+                showToast('Nur alkoholfreie Getränke ausgewählt');
+            } else if (filter === filterAlcoholic) {
+                currentDrinks = alcoholicDrinks;
+                showToast('Nur alkoholische Getränke ausgewählt');
+            }
+        }
+        
         // Generate random drink
         function generateRandomDrink() {
             // Show loading
@@ -473,10 +573,22 @@
             drinkName.style.display = 'none';
             loading.style.display = 'block';
             
+            // Check if there are drinks available for the current filter
+            if (currentDrinks.length === 0) {
+                loading.style.display = 'none';
+                drinkEmoji.style.display = 'block';
+                drinkName.style.display = 'block';
+                drinkEmoji.textContent = '😕';
+                drinkName.textContent = 'Keine Getränke für diesen Filter verfügbar';
+                shareBtn.disabled = true;
+                saveBtn.disabled = true;
+                return;
+            }
+            
             // Simulate loading for better UX
             setTimeout(() => {
-                const randomIndex = Math.floor(Math.random() * drinks.length);
-                currentDrink = drinks[randomIndex];
+                const randomIndex = Math.floor(Math.random() * currentDrinks.length);
+                currentDrink = currentDrinks[randomIndex];
                 
                 // Hide loading, show content
                 loading.style.display = 'none';
@@ -484,7 +596,13 @@
                 drinkName.style.display = 'block';
                 
                 drinkEmoji.textContent = currentDrink.emoji;
-                drinkName.textContent = currentDrink.name;
+                
+                // Show alcohol badge if needed
+                if (currentDrink.alcoholic) {
+                    drinkName.innerHTML = `${currentDrink.name} <span class="alcohol-badge">🍸 Mit Alkohol</span>`;
+                } else {
+                    drinkName.textContent = currentDrink.name;
+                }
                 
                 // Enable buttons
                 shareBtn.disabled = false;
@@ -506,16 +624,18 @@
         // Share functionality
         function shareDrink() {
             if (currentDrink) {
+                let alcoholText = currentDrink.alcoholic ? " (mit Alkohol) " : " ";
+                
                 if (navigator.share) {
                     navigator.share({
                         title: 'Schau mal, was für ein cooles Getränk!',
-                        text: `Ich habe "${currentDrink.name}" ${currentDrink.emoji} beim Spaßgetränk Zufallsgenerator gefunden!`,
+                        text: `Ich habe "${currentDrink.name}"${alcoholText}${currentDrink.emoji} beim Spaßgetränk Zufallsgenerator gefunden!`,
                         url: window.location.href
                     }).then(() => {
                         console.log('Drink shared successfully');
                     }).catch((error) => {
                         console.log('Error sharing:', error);
-                        const shareUrl = `${window.location.href}?drink=${encodeURIComponent(currentDrink.name)}`;
+                        const shareUrl = `${window.location.href}?drink=${encodeURIComponent(currentDrink.name)}&alcoholic=${currentDrink.alcoholic}`;
                         showToast(`Link kopiert: ${shareUrl}`);
                         // Copy to clipboard fallback
                         navigator.clipboard.writeText(shareUrl).catch(err => {
@@ -524,7 +644,7 @@
                     });
                 } else {
                     // Fallback for browsers that don't support navigator.share
-                    const shareUrl = `${window.location.href}?drink=${encodeURIComponent(currentDrink.name)}`;
+                    const shareUrl = `${window.location.href}?drink=${encodeURIComponent(currentDrink.name)}&alcoholic=${currentDrink.alcoholic}`;
                     showToast(`Link kopiert: ${shareUrl}`);
                     // Copy to clipboard
                     navigator.clipboard.writeText(shareUrl).catch(err => {
@@ -558,11 +678,23 @@
             savedDrinksArray.forEach((drink, index) => {
                 const drinkItem = document.createElement('div');
                 drinkItem.className = 'saved-drink-item';
-                drinkItem.innerHTML = `<span>${drink.emoji}</span> ${drink.name}`;
+                
+                if (drink.alcoholic) {
+                    drinkItem.innerHTML = `<span>${drink.emoji}</span> ${drink.name} <span class="alcohol-badge">🍸</span>`;
+                } else {
+                    drinkItem.innerHTML = `<span>${drink.emoji}</span> ${drink.name}`;
+                }
+                
                 drinkItem.addEventListener('click', () => {
                     currentDrink = drink;
                     drinkEmoji.textContent = drink.emoji;
-                    drinkName.textContent = drink.name;
+                    
+                    if (drink.alcoholic) {
+                        drinkName.innerHTML = `${drink.name} <span class="alcohol-badge">🍸 Mit Alkohol</span>`;
+                    } else {
+                        drinkName.textContent = drink.name;
+                    }
+                    
                     shareBtn.disabled = false;
                     // Animation
                     drinkEmoji.style.transform = 'scale(0.8)';
@@ -578,12 +710,26 @@
         function createCustomDrink() {
             const customName = prompt('Gib deinem Getränk einen Namen:');
             if (customName && customName.trim() !== '') {
-                const emojis = ['🥤', '🧃', '🍹', '🍸', '🍷', '🍶', '🍵', '☕', '🧉', '🥛', '🍊', '🍋'];
+                const isAlcoholic = confirm('Enthält dein Getränk Alkohol?');
+                const emojis = isAlcoholic ? 
+                    ['🍹', '🍸', '🍷', '🍶', '🥂', '🍾', '🍻', '🥃'] : 
+                    ['🥤', '🧃', '🍵', '☕', '🧉', '🥛', '🍊', '🍋'];
+                
                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                 
-                currentDrink = { name: customName.trim(), emoji: randomEmoji };
+                currentDrink = { 
+                    name: customName.trim(), 
+                    emoji: randomEmoji,
+                    alcoholic: isAlcoholic
+                };
+                
                 drinkEmoji.textContent = currentDrink.emoji;
-                drinkName.textContent = currentDrink.name;
+                
+                if (isAlcoholic) {
+                    drinkName.innerHTML = `${currentDrink.name} <span class="alcohol-badge">🍸 Mit Alkohol</span>`;
+                } else {
+                    drinkName.textContent = currentDrink.name;
+                }
                 
                 // Enable buttons
                 shareBtn.disabled = false;
@@ -604,27 +750,41 @@
         function checkUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
             const drinkParam = urlParams.get('drink');
+            const alcoholicParam = urlParams.get('alcoholic');
             
             if (drinkParam) {
-                const foundDrink = drinks.find(d => d.name === drinkParam);
+                const isAlcoholic = alcoholicParam === 'true';
+                
+                // First try to find in existing drinks
+                let foundDrink = allDrinks.find(d => d.name === drinkParam && d.alcoholic === isAlcoholic);
+                
                 if (foundDrink) {
                     currentDrink = foundDrink;
-                    drinkEmoji.textContent = foundDrink.emoji;
-                    drinkName.textContent = foundDrink.name;
-                    shareBtn.disabled = false;
-                    saveBtn.disabled = false;
-                    showToast('Geteiltes Getränk geladen!');
                 } else {
                     // Create custom drink from shared link
-                    const emojis = ['🥤', '🧃', '🍹', '🍸', '🍷', '🍶', '🍵', '☕', '🧉', '🥛', '🍊', '🍋'];
+                    const emojis = isAlcoholic ? 
+                        ['🍹', '🍸', '🍷', '🍶', '🥂', '🍾', '🍻', '🥃'] : 
+                        ['🥤', '🧃', '🍵', '☕', '🧉', '🥛', '🍊', '🍋'];
+                        
                     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                    currentDrink = { name: drinkParam, emoji: randomEmoji };
-                    drinkEmoji.textContent = currentDrink.emoji;
-                    drinkName.textContent = currentDrink.name;
-                    shareBtn.disabled = false;
-                    saveBtn.disabled = false;
-                    showToast('Geteiltes Getränk geladen!');
+                    currentDrink = { 
+                        name: drinkParam, 
+                        emoji: randomEmoji,
+                        alcoholic: isAlcoholic
+                    };
                 }
+                
+                drinkEmoji.textContent = currentDrink.emoji;
+                
+                if (currentDrink.alcoholic) {
+                    drinkName.innerHTML = `${currentDrink.name} <span class="alcohol-badge">🍸 Mit Alkohol</span>`;
+                } else {
+                    drinkName.textContent = currentDrink.name;
+                }
+                
+                shareBtn.disabled = false;
+                saveBtn.disabled = false;
+                showToast('Geteiltes Getränk geladen!');
             }
         }
         
@@ -634,20 +794,16 @@
         saveBtn.addEventListener('click', saveDrink);
         customBtn.addEventListener('click', createCustomDrink);
         
+        // Filter button listeners
+        filterAll.addEventListener('click', () => changeFilter(filterAll));
+        filterNonAlcoholic.addEventListener('click', () => changeFilter(filterNonAlcoholic));
+        filterAlcoholic.addEventListener('click', () => changeFilter(filterAlcoholic));
+        
         // Handle touch and click focus states
-        const buttons = document.querySelectorAll('.btn');
+        const buttons = document.querySelectorAll('.btn, .filter-btn');
         buttons.forEach(button => {
             button.addEventListener('touchstart', function() {
                 this.style.transform = 'scale(0.98)';
             });
             
             button.addEventListener('touchend', function() {
-                this.style.transform = '';
-            });
-        });
-        
-        // Check URL params on load
-        document.addEventListener('DOMContentLoaded', checkUrlParams);
-    </script>
-</body>
-</html>
