@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelart Schiff Steuerungsspiel</title>
+    <title>Verbessertes Pixelart Schiff Steuerungsspiel</title>
     <style>
         body {
             margin: 0;
@@ -11,6 +11,7 @@
             overflow: hidden;
             touch-action: none;
             background-color: #333;
+            font-family: 'Arial', sans-serif;
         }
         canvas {
             display: block;
@@ -18,10 +19,30 @@
             height: 100vh;
             image-rendering: pixelated;
         }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #speedControl {
+            width: 120px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div id="controls">
+        <label for="autoSail">Automatisches Segeln: </label>
+        <input type="checkbox" id="autoSail" checked>
+        <br>
+        <label for="speedControl">Geschwindigkeit: </label>
+        <input type="range" id="speedControl" min="1" max="5" value="2">
+    </div>
 
     <script>
         // Canvas und Kontext einrichten
@@ -47,11 +68,23 @@
         const COLORS = {
             deepWater: '#1a3876',
             shallowWater: '#3f5ea8',
+            waterHighlight: '#5a78c0',
             sand: '#d9c27e',
             grass: '#2d632f',
             dock: '#8b572a',
-            dockShadow: '#573718'
+            dockShadow: '#573718',
+            shipHull: '#573718',
+            shipDeck: '#8b572a',
+            shipSail: '#e0e0e0',
+            shipSailShadow: '#c0c0c0',
+            shipMast: '#573718',
+            shipCabin: '#8b572a',
+            shipCabinWindow: '#3b81f5'
         };
+        
+        // Automatische Steuerung
+        const autoSailCheckbox = document.getElementById('autoSail');
+        const speedControl = document.getElementById('speedControl');
         
         // Spielzustand
         const game = {
@@ -63,7 +96,10 @@
                 speed: 2,
                 rotation: 0,
                 targetX: null,
-                targetY: null
+                targetY: null,
+                autoSailSpeed: 0.01,
+                autoSailAngle: 0,
+                waveOffset: 0
             },
             camera: {
                 x: 0,
@@ -74,8 +110,20 @@
                 chunkSize: 16, // in Tiles
                 loadedRange: 2 // Wie viele Chunks in jede Richtung geladen werden
             },
-            worldSeed: Math.random() * 10000 | 0
+            worldSeed: Math.random() * 10000 | 0,
+            time: 0,
+            waves: []
         };
+        
+        // Wellenanimation initialisieren
+        for (let i = 0; i < 20; i++) {
+            game.waves.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 10 + 5,
+                speed: Math.random() * 0.5 + 0.5
+            });
+        }
         
         // Einfacher Perlin-Noise ähnlicher Zufallsgenerator
         function noise(x, y) {
@@ -121,7 +169,8 @@
                     chunk.tiles.push({
                         x: x * DISPLAY_TILE_SIZE + worldX,
                         y: y * DISPLAY_TILE_SIZE + worldY,
-                        type: tileType
+                        type: tileType,
+                        heightValue: heightValue
                     });
                     
                     // Generiere zufällig einen Steg (nur am Übergang zum Wasser)
@@ -201,6 +250,25 @@
                 ctx.fillStyle = COLORS[tile.type];
                 ctx.fillRect(screenX, screenY, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE);
                 
+                // Wasseranimation für tiefes und flaches Wasser
+                if (tile.type === 'deepWater' || tile.type === 'shallowWater') {
+                    const waveIntensity = tile.type === 'deepWater' ? 0.08 : 0.04;
+                    const waveTime = game.time * 0.003;
+                    const waveX = Math.sin(tile.x * 0.05 + waveTime) * waveIntensity;
+                    const waveY = Math.cos(tile.y * 0.05 + waveTime) * waveIntensity;
+                    
+                    // Wellen zeichnen
+                    ctx.fillStyle = COLORS.waterHighlight;
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillRect(
+                        screenX + DISPLAY_TILE_SIZE * (0.2 + waveX),
+                        screenY + DISPLAY_TILE_SIZE * (0.2 + waveY),
+                        DISPLAY_TILE_SIZE * 0.2,
+                        DISPLAY_TILE_SIZE * 0.2
+                    );
+                    ctx.globalAlpha = 1.0;
+                }
+                
                 // Zeichne Schatten für Steg
                 if (tile.type === 'dock') {
                     ctx.fillStyle = COLORS.dockShadow;
@@ -214,36 +282,218 @@
             }
         }
         
+        // Zeichnet die Schaumwellen
+        function drawWaves() {
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = "#ffffff";
+            
+            for (const wave of game.waves) {
+                const screenX = wave.x - game.camera.x % canvas.width;
+                const screenY = wave.y - game.camera.y % canvas.height;
+                
+                // Welle zeichnen
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, wave.size * (Math.sin(game.time * 0.01) * 0.2 + 0.8), 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Wellen bewegen
+                wave.x += Math.cos(game.ship.rotation) * wave.speed;
+                wave.y += Math.sin(game.ship.rotation) * wave.speed;
+                
+                // Wellen, die aus dem Bildschirm laufen, auf der anderen Seite wieder eintreten lassen
+                if (screenX < -wave.size) wave.x += canvas.width + wave.size * 2;
+                if (screenX > canvas.width + wave.size) wave.x -= canvas.width + wave.size * 2;
+                if (screenY < -wave.size) wave.y += canvas.height + wave.size * 2;
+                if (screenY > canvas.height + wave.size) wave.y -= canvas.height + wave.size * 2;
+            }
+            
+            ctx.globalAlpha = 1.0;
+        }
+        
         // Zeichnet das Schiff
         function drawShip() {
             const shipX = game.ship.x - game.camera.x;
             const shipY = game.ship.y - game.camera.y;
             
+            // Schiffanimation (leichtes Schaukeln)
+            const bobOffset = Math.sin(game.time * 0.02) * 2;
+            
             ctx.save();
-            ctx.translate(shipX + game.ship.width / 2, shipY + game.ship.height / 2);
+            ctx.translate(shipX + game.ship.width / 2, shipY + game.ship.height / 2 + bobOffset);
             ctx.rotate(game.ship.rotation);
             
             // Schiffsrumpf
-            ctx.fillStyle = '#573718';
-            ctx.fillRect(-game.ship.width / 2, -game.ship.height / 2, game.ship.width, game.ship.height);
+            ctx.fillStyle = COLORS.shipHull;
+            ctx.beginPath();
+            ctx.moveTo(-game.ship.width / 2, 0);
+            ctx.lineTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.5, game.ship.height / 2);
+            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.5, game.ship.height / 2);
+            ctx.lineTo(game.ship.width / 2, 0);
+            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.5, -game.ship.height / 2);
+            ctx.lineTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.5, -game.ship.height / 2);
+            ctx.closePath();
+            ctx.fill();
             
             // Deck
-            ctx.fillStyle = '#8b572a';
-            ctx.fillRect(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.2, -game.ship.height / 2 + DISPLAY_TILE_SIZE * 0.2, 
-                         game.ship.width - DISPLAY_TILE_SIZE * 0.4, game.ship.height - DISPLAY_TILE_SIZE * 0.4);
+            ctx.fillStyle = COLORS.shipDeck;
+            ctx.beginPath();
+            ctx.moveTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.6, -game.ship.height / 2 + DISPLAY_TILE_SIZE * 0.2);
+            ctx.lineTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.6, game.ship.height / 2 - DISPLAY_TILE_SIZE * 0.2);
+            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.6, game.ship.height / 2 - DISPLAY_TILE_SIZE * 0.2);
+            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.6, -game.ship.height / 2 + DISPLAY_TILE_SIZE * 0.2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Schiffskabine
+            ctx.fillStyle = COLORS.shipCabin;
+            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.6, -DISPLAY_TILE_SIZE * 0.4, DISPLAY_TILE_SIZE * 1.2, DISPLAY_TILE_SIZE * 0.8);
+            
+            // Kabinenfenster
+            ctx.fillStyle = COLORS.shipCabinWindow;
+            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.4, -DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25);
+            ctx.fillRect(DISPLAY_TILE_SIZE * 0.15, -DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25);
             
             // Mast
-            ctx.fillStyle = '#573718';
-            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.2, -game.ship.height / 2 - DISPLAY_TILE_SIZE * 0.5, 
-                         DISPLAY_TILE_SIZE * 0.4, DISPLAY_TILE_SIZE * 0.5);
+            ctx.fillStyle = COLORS.shipMast;
+            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 1.5, DISPLAY_TILE_SIZE * 0.2, DISPLAY_TILE_SIZE * 1.5);
+            
+            // Segel (mit Animation)
+            const sailWave = Math.sin(game.time * 0.03) * 0.1;
+            
+            ctx.fillStyle = COLORS.shipSailShadow;
+            ctx.beginPath();
+            ctx.moveTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 1.5);
+            ctx.bezierCurveTo(
+                DISPLAY_TILE_SIZE * (0.5 + sailWave), -DISPLAY_TILE_SIZE * 1.3,
+                DISPLAY_TILE_SIZE * (0.6 + sailWave), -DISPLAY_TILE_SIZE * 0.8,
+                DISPLAY_TILE_SIZE * 0.6, -DISPLAY_TILE_SIZE * 0.5
+            );
+            ctx.lineTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = COLORS.shipSail;
+            ctx.beginPath();
+            ctx.moveTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 1.5);
+            ctx.bezierCurveTo(
+                DISPLAY_TILE_SIZE * (0.4 + sailWave), -DISPLAY_TILE_SIZE * 1.2,
+                DISPLAY_TILE_SIZE * (0.5 + sailWave), -DISPLAY_TILE_SIZE * 0.7,
+                DISPLAY_TILE_SIZE * 0.5, -DISPLAY_TILE_SIZE * 0.5
+            );
+            ctx.lineTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Zweites Segel (klein)
+            ctx.fillStyle = COLORS.shipSailShadow;
+            ctx.beginPath();
+            ctx.moveTo(DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
+            ctx.bezierCurveTo(
+                DISPLAY_TILE_SIZE * (0.5 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.45,
+                DISPLAY_TILE_SIZE * (0.5 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.2,
+                DISPLAY_TILE_SIZE * 0.4, 0
+            );
+            ctx.lineTo(DISPLAY_TILE_SIZE * 0.1, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = COLORS.shipSail;
+            ctx.beginPath();
+            ctx.moveTo(DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
+            ctx.bezierCurveTo(
+                DISPLAY_TILE_SIZE * (0.4 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.4,
+                DISPLAY_TILE_SIZE * (0.4 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.1,
+                DISPLAY_TILE_SIZE * 0.3, 0
+            );
+            ctx.lineTo(DISPLAY_TILE_SIZE * 0.1, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Bugsprit
+            ctx.fillStyle = COLORS.shipMast;
+            ctx.save();
+            ctx.rotate(Math.PI / 8);
+            ctx.fillRect(0, 0, DISPLAY_TILE_SIZE * 0.1, DISPLAY_TILE_SIZE * 0.7);
+            ctx.restore();
             
             ctx.restore();
         }
         
+        // Prüft Kollision mit Land
+        function checkCollision() {
+            const shipX = game.ship.x;
+            const shipY = game.ship.y;
+            
+            for (const chunk of game.map.chunks) {
+                for (const tile of chunk.tiles) {
+                    if (tile.type !== 'deepWater' && tile.type !== 'shallowWater') {
+                        const dx = shipX - tile.x;
+                        const dy = shipY - tile.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < DISPLAY_TILE_SIZE) {
+                            // Bei Landkollision die Geschwindigkeit reduzieren
+                            game.ship.speed = 0.5;
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            // Bei keiner Kollision normale Geschwindigkeit
+            game.ship.speed = parseFloat(speedControl.value);
+            return false;
+        }
+        
         // Aktualisiert die Spiellogik
         function update() {
-            // Bewege das Schiff zum Zielpunkt, falls vorhanden
-            if (game.ship.targetX !== null && game.ship.targetY !== null) {
+            game.time++;
+            
+            // Aktualisiere Schiffsgeschwindigkeit vom Schieberegler
+            game.ship.speed = parseFloat(speedControl.value);
+            
+            // Automatisches Segeln, wenn aktiviert
+            if (autoSailCheckbox.checked) {
+                // Ändere den Kurs leicht und zufällig
+                game.ship.autoSailAngle += (Math.random() * 0.04 - 0.02);
+                
+                // Ab und zu den Kurs stärker ändern
+                if (Math.random() < 0.01) {
+                    game.ship.autoSailAngle += (Math.random() * 0.2 - 0.1);
+                }
+                
+                // An Landmassen vorbei navigieren
+                const lookAheadDistance = DISPLAY_TILE_SIZE * 5;
+                const lookAheadX = game.ship.x + Math.cos(game.ship.rotation) * lookAheadDistance;
+                const lookAheadY = game.ship.y + Math.sin(game.ship.rotation) * lookAheadDistance;
+                
+                for (const chunk of game.map.chunks) {
+                    for (const tile of chunk.tiles) {
+                        if (tile.type !== 'deepWater' && tile.type !== 'shallowWater') {
+                            const dx = lookAheadX - tile.x;
+                            const dy = lookAheadY - tile.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < DISPLAY_TILE_SIZE * 2) {
+                                // Hinderniserkennung: Kurs ändern
+                                game.ship.autoSailAngle += Math.PI / 4 * (Math.random() < 0.5 ? 1 : -1);
+                            }
+                        }
+                    }
+                }
+                
+                // Rotationswinkel aktualisieren
+                game.ship.rotation += game.ship.autoSailAngle;
+                
+                // Stabilisiere den Kurs leicht
+                game.ship.autoSailAngle *= 0.95;
+                
+                // Bewege Schiff in die aktuelle Richtung
+                game.ship.x += Math.cos(game.ship.rotation) * game.ship.speed;
+                game.ship.y += Math.sin(game.ship.rotation) * game.ship.speed;
+            }
+            // Manuelle Bewegung zum Ziel
+            else if (game.ship.targetX !== null && game.ship.targetY !== null) {
                 const dx = game.ship.targetX - game.ship.x;
                 const dy = game.ship.targetY - game.ship.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -261,6 +511,9 @@
                     game.ship.targetY = null;
                 }
             }
+            
+            // Kollisionsprüfung
+            checkCollision();
             
             // Aktualisiere Kamera, um das Schiff zu folgen
             game.camera.x = game.ship.x - canvas.width / 2 + game.ship.width / 2;
@@ -281,6 +534,9 @@
                 drawChunk(chunk);
             }
             
+            // Zeichne Wellen
+            drawWaves();
+            
             // Zeichne das Schiff
             drawShip();
         }
@@ -295,6 +551,11 @@
         // Event-Listener für Mausklicks und Touch
         function handlePointerDown(e) {
             e.preventDefault();
+            
+            // Wenn automatisches Segeln aktiv ist, ignoriere manuelle Eingaben
+            if (autoSailCheckbox.checked) {
+                return;
+            }
             
             let x, y;
             
@@ -315,6 +576,15 @@
         // Event-Listener registrieren
         canvas.addEventListener('mousedown', handlePointerDown);
         canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+        
+        // Event-Listener für Steuerungselemente
+        autoSailCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Ziel zurücksetzen wenn automatisches Segeln aktiviert wird
+                game.ship.targetX = null;
+                game.ship.targetY = null;
+            }
+        });
         
         // Initialisiere einige Chunks um das Schiff herum
         updateChunks();
