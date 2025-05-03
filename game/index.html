@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelart Schiff Steuerungsspiel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            touch-action: none;
+            background-color: #333;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // Canvas und Kontext einrichten
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Stellt die Größe des Canvas auf die Fenstergröße ein
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        // Bei Start und Größenänderung des Fensters aufrufen
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Spielkonstanten
+        const TILE_SIZE = 16;
+        const SCALE = 3;
+        const DISPLAY_TILE_SIZE = TILE_SIZE * SCALE;
+        
+        // Farben
+        const COLORS = {
+            deepWater: '#1a3876',
+            shallowWater: '#3f5ea8',
+            sand: '#d9c27e',
+            grass: '#2d632f',
+            dock: '#8b572a',
+            dockShadow: '#573718'
+        };
+        
+        // Spielzustand
+        const game = {
+            ship: {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                width: DISPLAY_TILE_SIZE * 2,
+                height: DISPLAY_TILE_SIZE,
+                speed: 2,
+                rotation: 0,
+                targetX: null,
+                targetY: null
+            },
+            camera: {
+                x: 0,
+                y: 0
+            },
+            map: {
+                chunks: [],
+                chunkSize: 16, // in Tiles
+                loadedRange: 2 // Wie viele Chunks in jede Richtung geladen werden
+            },
+            worldSeed: Math.random() * 10000 | 0
+        };
+        
+        // Einfacher Perlin-Noise ähnlicher Zufallsgenerator
+        function noise(x, y) {
+            const seed = game.worldSeed;
+            const value = Math.sin(x * 0.1 + seed) * Math.cos(y * 0.1 + seed) * 0.5 + 0.5;
+            return value;
+        }
+        
+        // Erstellt einen neuen Chunk an der angegebenen Position
+        function generateChunk(chunkX, chunkY) {
+            const chunk = {
+                x: chunkX,
+                y: chunkY,
+                tiles: []
+            };
+            
+            const chunkSize = game.map.chunkSize;
+            const worldX = chunkX * chunkSize * DISPLAY_TILE_SIZE;
+            const worldY = chunkY * chunkSize * DISPLAY_TILE_SIZE;
+            
+            for (let y = 0; y < chunkSize; y++) {
+                for (let x = 0; x < chunkSize; x++) {
+                    const absX = chunkX * chunkSize + x;
+                    const absY = chunkY * chunkSize + y;
+                    
+                    // Generiere Höhenwert
+                    const heightValue = noise(absX * 0.5, absY * 0.5);
+                    
+                    let tileType;
+                    
+                    // Bestimme Tile-Typ basierend auf Höhenwert
+                    if (heightValue < 0.4) {
+                        tileType = 'deepWater';
+                    } else if (heightValue < 0.45) {
+                        tileType = 'shallowWater';
+                    } else if (heightValue < 0.5) {
+                        tileType = 'sand';
+                    } else {
+                        tileType = 'grass';
+                    }
+                    
+                    // Speichere Tile-Information
+                    chunk.tiles.push({
+                        x: x * DISPLAY_TILE_SIZE + worldX,
+                        y: y * DISPLAY_TILE_SIZE + worldY,
+                        type: tileType
+                    });
+                    
+                    // Generiere zufällig einen Steg (nur am Übergang zum Wasser)
+                    if (tileType === 'sand' && noise(absX * 5, absY * 5) > 0.9) {
+                        // Prüfe, ob benachbartes Tile Wasser ist
+                        const leftValue = noise((absX - 1) * 0.5, absY * 0.5);
+                        const rightValue = noise((absX + 1) * 0.5, absY * 0.5);
+                        const upValue = noise(absX * 0.5, (absY - 1) * 0.5);
+                        const downValue = noise(absX * 0.5, (absY + 1) * 0.5);
+                        
+                        // Erstelle Steg nur wenn in der Nähe von Wasser
+                        if (leftValue < 0.45 || rightValue < 0.45 || upValue < 0.45 || downValue < 0.45) {
+                            chunk.tiles.push({
+                                x: x * DISPLAY_TILE_SIZE + worldX,
+                                y: y * DISPLAY_TILE_SIZE + worldY,
+                                type: 'dock'
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return chunk;
+        }
+        
+        // Prüft, ob ein Chunk bereits existiert
+        function getChunk(chunkX, chunkY) {
+            return game.map.chunks.find(chunk => chunk.x === chunkX && chunk.y === chunkY);
+        }
+        
+        // Aktualisiere die geladenen Chunks basierend auf der Schiffsposition
+        function updateChunks() {
+            const chunkSize = game.map.chunkSize;
+            const displaySize = DISPLAY_TILE_SIZE;
+            
+            // Bestimme die aktuellen Chunk-Koordinaten des Schiffs
+            const shipChunkX = Math.floor(game.ship.x / (chunkSize * displaySize));
+            const shipChunkY = Math.floor(game.ship.y / (chunkSize * displaySize));
+            
+            // Lade Chunks im Umkreis
+            const range = game.map.loadedRange;
+            for (let dy = -range; dy <= range; dy++) {
+                for (let dx = -range; dx <= range; dx++) {
+                    const chunkX = shipChunkX + dx;
+                    const chunkY = shipChunkY + dy;
+                    
+                    // Erstelle Chunk, wenn er noch nicht existiert
+                    if (!getChunk(chunkX, chunkY)) {
+                        game.map.chunks.push(generateChunk(chunkX, chunkY));
+                    }
+                }
+            }
+            
+            // Entferne Chunks, die zu weit entfernt sind
+            game.map.chunks = game.map.chunks.filter(chunk => {
+                const distance = Math.max(
+                    Math.abs(chunk.x - shipChunkX),
+                    Math.abs(chunk.y - shipChunkY)
+                );
+                return distance <= range + 1;
+            });
+        }
+        
+        // Zeichnet einen Chunk
+        function drawChunk(chunk) {
+            for (const tile of chunk.tiles) {
+                const screenX = tile.x - game.camera.x;
+                const screenY = tile.y - game.camera.y;
+                
+                // Prüfe, ob das Tile auf dem Bildschirm ist
+                if (screenX < -DISPLAY_TILE_SIZE || screenY < -DISPLAY_TILE_SIZE || 
+                    screenX > canvas.width || screenY > canvas.height) {
+                    continue;
+                }
+                
+                // Zeichne das Tile
+                ctx.fillStyle = COLORS[tile.type];
+                ctx.fillRect(screenX, screenY, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE);
+                
+                // Zeichne Schatten für Steg
+                if (tile.type === 'dock') {
+                    ctx.fillStyle = COLORS.dockShadow;
+                    ctx.fillRect(
+                        screenX + DISPLAY_TILE_SIZE * 0.1,
+                        screenY + DISPLAY_TILE_SIZE * 0.1,
+                        DISPLAY_TILE_SIZE * 0.8,
+                        DISPLAY_TILE_SIZE * 0.8
+                    );
+                }
+            }
+        }
+        
+        // Zeichnet das Schiff
+        function drawShip() {
+            const shipX = game.ship.x - game.camera.x;
+            const shipY = game.ship.y - game.camera.y;
+            
+            ctx.save();
+            ctx.translate(shipX + game.ship.width / 2, shipY + game.ship.height / 2);
+            ctx.rotate(game.ship.rotation);
+            
+            // Schiffsrumpf
+            ctx.fillStyle = '#573718';
+            ctx.fillRect(-game.ship.width / 2, -game.ship.height / 2, game.ship.width, game.ship.height);
+            
+            // Deck
+            ctx.fillStyle = '#8b572a';
+            ctx.fillRect(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.2, -game.ship.height / 2 + DISPLAY_TILE_SIZE * 0.2, 
+                         game.ship.width - DISPLAY_TILE_SIZE * 0.4, game.ship.height - DISPLAY_TILE_SIZE * 0.4);
+            
+            // Mast
+            ctx.fillStyle = '#573718';
+            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.2, -game.ship.height / 2 - DISPLAY_TILE_SIZE * 0.5, 
+                         DISPLAY_TILE_SIZE * 0.4, DISPLAY_TILE_SIZE * 0.5);
+            
+            ctx.restore();
+        }
+        
+        // Aktualisiert die Spiellogik
+        function update() {
+            // Bewege das Schiff zum Zielpunkt, falls vorhanden
+            if (game.ship.targetX !== null && game.ship.targetY !== null) {
+                const dx = game.ship.targetX - game.ship.x;
+                const dy = game.ship.targetY - game.ship.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 5) {
+                    // Berechne Rotation
+                    game.ship.rotation = Math.atan2(dy, dx);
+                    
+                    // Bewege Schiff in die Richtung
+                    game.ship.x += (dx / distance) * game.ship.speed;
+                    game.ship.y += (dy / distance) * game.ship.speed;
+                } else {
+                    // Ziel erreicht
+                    game.ship.targetX = null;
+                    game.ship.targetY = null;
+                }
+            }
+            
+            // Aktualisiere Kamera, um das Schiff zu folgen
+            game.camera.x = game.ship.x - canvas.width / 2 + game.ship.width / 2;
+            game.camera.y = game.ship.y - canvas.height / 2 + game.ship.height / 2;
+            
+            // Aktualisiere Chunks basierend auf der Schiffsposition
+            updateChunks();
+        }
+        
+        // Hauptzeichenfunktion
+        function draw() {
+            // Lösche den Canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Zeichne alle Chunks
+            for (const chunk of game.map.chunks) {
+                drawChunk(chunk);
+            }
+            
+            // Zeichne das Schiff
+            drawShip();
+        }
+        
+        // Game Loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Event-Listener für Mausklicks und Touch
+        function handlePointerDown(e) {
+            e.preventDefault();
+            
+            let x, y;
+            
+            // Unterschiedliche Behandlung für Touch und Maus
+            if (e.type === 'touchstart') {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+            
+            // Konvertiere Bildschirmposition zu Weltposition
+            game.ship.targetX = x + game.camera.x;
+            game.ship.targetY = y + game.camera.y;
+        }
+        
+        // Event-Listener registrieren
+        canvas.addEventListener('mousedown', handlePointerDown);
+        canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+        
+        // Initialisiere einige Chunks um das Schiff herum
+        updateChunks();
+        
+        // Starte das Spiel
+        gameLoop();
+    </script>
+</body>
+</html>
