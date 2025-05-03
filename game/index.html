@@ -3,594 +3,784 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verbessertes Pixelart Schiff Steuerungsspiel</title>
+    <title>Flaschen-Füller</title>
     <style>
         body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #FFF5E4;
+            color: #333;
+            text-align: center;
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            touch-action: none;
-            background-color: #333;
-            font-family: 'Arial', sans-serif;
-        }
-        canvas {
-            display: block;
-            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             height: 100vh;
+            overflow: hidden;
             image-rendering: pixelated;
         }
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
+
+        @font-face {
+            font-family: 'Press Start 2P';
+            src: url('https://cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfontloader.js');
         }
-        #speedControl {
-            width: 120px;
-            vertical-align: middle;
+
+        #game-container {
+            position: relative;
+            width: 320px;
+            height: 400px;
+            background-color: #FFE3E1;
+            border: 4px solid #FFD1D1;
+            box-shadow: 0 0 10px rgba(255, 148, 148, 0.5);
+            overflow: hidden;
+        }
+
+        #start-screen, #game-screen, #game-over-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #start-screen, #game-over-screen {
+            background-color: #FFE3E1;
+        }
+
+        #game-screen {
+            display: none;
+        }
+
+        #game-over-screen {
+            display: none;
+        }
+
+        .bottle {
+            position: relative;
+            width: 70px;
+            height: 140px;
+            margin: 20px auto;
+            cursor: pointer;
+        }
+
+        .bottle-img {
+            width: 70px;
+            height: 140px;
+        }
+
+        .fill-level {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #FF9494;
+            transition: height 0.1s ease-out;
+        }
+
+        .button {
+            background-color: #FF9494;
+            color: #FFF5E4;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0 #FFD1D1;
+        }
+
+        .button:hover {
+            background-color: #FFD1D1;
+            color: #333;
+        }
+
+        .button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #FFD1D1;
+        }
+
+        .instructions {
+            font-size: 10px;
+            margin: 10px 0;
+            line-height: 1.5;
+            max-width: 280px;
+            color: #333;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
+            font-size: 12px;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        #level-indicator {
+            background-color: #FFF5E4;
+            height: 20px;
+            width: 180px;
+            margin: 10px auto;
+            border: 2px solid #FFD1D1;
+            position: relative;
+        }
+
+        #level-bar {
+            background-color: #FF9494;
+            height: 100%;
+            width: 0%;
+            transition: width 0.1s ease-out;
+        }
+
+        #ideal-range {
+            position: absolute;
+            height: 100%;
+            right: 0;
+            background-color: rgba(255, 209, 209, 0.7);
+        }
+
+        .lives {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .life {
+            width: 20px;
+            height: 20px;
+            background-color: #FF9494;
+            margin: 0 5px;
+            clip-path: polygon(
+                50% 0%, 61% 35%, 98% 35%, 68% 57%, 
+                79% 91%, 50% 70%, 21% 91%, 32% 57%, 
+                2% 35%, 39% 35%
+            );
+        }
+
+        .burst {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+
+        .pixel {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: #FF9494;
+        }
+
+        .title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #FF9494;
+            text-shadow: 2px 2px 0 #FFD1D1;
+        }
+
+        .score-text {
+            font-size: 14px;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .final-score {
+            font-size: 24px;
+            color: #FF9494;
+            margin: 20px 0;
+        }
+
+        /* 8-bit styled bottle - more recognizable */
+        .bottle-graphic {
+            position: relative;
+            width: 70px;
+            height: 140px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .bottle-outline {
+            position: absolute;
+            width: 70px;
+            height: 140px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 3px solid #FFD1D1;
+            border-radius: 8px 8px 30px 30px;
+            box-sizing: border-box;
+            z-index: 2;
+        }
+
+        .bottle-cap {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: 30px;
+            height: 15px;
+            background-color: #FF9494;
+            border-radius: 5px 5px 0 0;
+            z-index: 3;
+        }
+
+        .bottle-neck {
+            position: absolute;
+            top: 15px;
+            left: 25px;
+            width: 20px;
+            height: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 1;
+        }
+
+        .bottle-body {
+            position: absolute;
+            top: 40px;
+            width: 70px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 0 0 30px 30px;
+            z-index: 1;
+        }
+
+        .bottle-label {
+            position: absolute;
+            top: 60px;
+            left: 5px;
+            width: 60px;
+            height: 40px;
+            background-color: #FFD1D1;
+            border: 2px solid #FF9494;
+            z-index: 3;
+        }
+
+        .bubbles-container {
+            position: absolute;
+            bottom: 0;
+            width: 70px;
+            height: 0px;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 70px;
+            background-color: #FF9494;
+            z-index: 1;
+            transition: height 0.1s ease-out;
+        }
+
+        .bubble {
+            position: absolute;
+            background-color: #FFF5E4;
+            border-radius: 50%;
+            animation: float 2s infinite ease-in-out;
+        }
+        
+        .filling-machine {
+            position: absolute;
+            top: -40px;
+            left: 15px;
+            width: 40px;
+            height: 40px;
+            background-color: #FFD1D1;
+            border: 3px solid #FF9494;
+            border-radius: 0 0 10px 10px;
+            z-index: 4;
+        }
+        
+        .nozzle {
+            position: absolute;
+            bottom: -10px;
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            background-color: #FF9494;
+            border-radius: 0 0 5px 5px;
+            z-index: 5;
+        }
+        
+        .drip {
+            position: absolute;
+            top: 0;
+            left: 4px;
+            width: 2px;
+            height: 0;
+            background-color: #FF9494;
+            z-index: 4;
+            animation: drip 1s infinite;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="controls">
-        <label for="autoSail">Automatisches Segeln: </label>
-        <input type="checkbox" id="autoSail" checked>
-        <br>
-        <label for="speedControl">Geschwindigkeit: </label>
-        <input type="range" id="speedControl" min="1" max="5" value="2">
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <div class="title">GETRÄNKE-ABFÜLLER</div>
+            <div class="bottle-graphic">
+                <div class="bottle-cap"></div>
+                <div class="bottle-neck"></div>
+                <div class="bottle-body"></div>
+                <div class="bottle-label"></div>
+                <div class="bottle-outline"></div>
+                <div class="filling-machine">
+                    <div class="nozzle">
+                        <div class="drip"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="instructions">
+                Klicke auf die Flasche, um die Abfüllung zu starten.
+                Klicke erneut, um den Füllvorgang zu stoppen.
+                Ziele auf den rosafarbenen Bereich, aber sei vorsichtig! 
+                Bei Überfüllung verschüttest du das Getränk!
+            </div>
+            <button id="start-button" class="button">Start</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen">
+            <div class="stats">
+                <div>PUNKTE: <span id="score">0</span></div>
+                <div>LEVEL: <span id="level">1</span></div>
+            </div>
+            
+            <div class="bottle" id="bottle">
+                <div class="bottle-graphic">
+                    <div class="bottle-cap"></div>
+                    <div class="bottle-neck"></div>
+                    <div class="bottle-body"></div>
+                    <div class="bottle-label"></div>
+                    <div class="liquid" id="liquid"></div>
+                    <div class="bubbles-container" id="bubbles-container"></div>
+                    <div class="bottle-outline"></div>
+                    <div class="filling-machine">
+                        <div class="nozzle">
+                            <div class="drip" id="drip"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="burst" id="burst"></div>
+            </div>
+            
+            <div id="level-indicator">
+                <div id="ideal-range"></div>
+                <div id="level-bar"></div>
+            </div>
+            
+            <div class="lives" id="lives">
+                <div class="life"></div>
+                <div class="life"></div>
+                <div class="life"></div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen">
+        <div class="title">GETRÄNKE-ABFÜLLER</div>
+            <div class="bottle-graphic">
+                <div class="bottle-cap"></div>
+                <div class="bottle-neck"></div>
+                <div class="bottle-body"></div>
+                <div class="bottle-label"></div>
+                <div class="bottle-outline"></div>
+                <div class="filling-machine">
+                    <div class="nozzle">
+                        <div class="drip"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="score-text">ENDSTAND:</div>
+            <div class="final-score" id="final-score">0</div>
+            <button id="restart-button" class="button">Neustart</button>
+        </div>
     </div>
 
     <script>
-        // Canvas und Kontext einrichten
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Stellt die Größe des Canvas auf die Fenstergröße ein
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // Game variables
+        let currentFillLevel = 0;
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let idealMin = 80;
+        let idealMax = 100;
+        let gameActive = false;
+        let isFillingActive = false;
+        let fillInterval = null;
+        let burstParticles = [];
+        let bubbles = [];
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const bottle = document.getElementById('bottle');
+        const levelBar = document.getElementById('level-bar');
+        const idealRange = document.getElementById('ideal-range');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const livesDisplay = document.getElementById('lives');
+        const burstElement = document.getElementById('burst');
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const liquidElement = document.getElementById('liquid');
+        const dripElement = document.getElementById('drip');
+
+        // Set ideal range display
+        function updateIdealRange() {
+            idealRange.style.width = (idealMax - idealMin) + '%';
+            idealRange.style.right = (100 - idealMax) + '%';
         }
-        
-        // Bei Start und Größenänderung des Fensters aufrufen
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        
-        // Spielkonstanten
-        const TILE_SIZE = 16;
-        const SCALE = 3;
-        const DISPLAY_TILE_SIZE = TILE_SIZE * SCALE;
-        
-        // Farben
-        const COLORS = {
-            deepWater: '#1a3876',
-            shallowWater: '#3f5ea8',
-            waterHighlight: '#5a78c0',
-            sand: '#d9c27e',
-            grass: '#2d632f',
-            dock: '#8b572a',
-            dockShadow: '#573718',
-            shipHull: '#573718',
-            shipDeck: '#8b572a',
-            shipSail: '#e0e0e0',
-            shipSailShadow: '#c0c0c0',
-            shipMast: '#573718',
-            shipCabin: '#8b572a',
-            shipCabinWindow: '#3b81f5'
-        };
-        
-        // Automatische Steuerung
-        const autoSailCheckbox = document.getElementById('autoSail');
-        const speedControl = document.getElementById('speedControl');
-        
-        // Spielzustand
-        const game = {
-            ship: {
-                x: canvas.width / 2,
-                y: canvas.height / 2,
-                width: DISPLAY_TILE_SIZE * 2,
-                height: DISPLAY_TILE_SIZE,
-                speed: 2,
-                rotation: 0,
-                targetX: null,
-                targetY: null,
-                autoSailSpeed: 0.01,
-                autoSailAngle: 0,
-                waveOffset: 0
-            },
-            camera: {
-                x: 0,
-                y: 0
-            },
-            map: {
-                chunks: [],
-                chunkSize: 16, // in Tiles
-                loadedRange: 2 // Wie viele Chunks in jede Richtung geladen werden
-            },
-            worldSeed: Math.random() * 10000 | 0,
-            time: 0,
-            waves: []
-        };
-        
-        // Wellenanimation initialisieren
-        for (let i = 0; i < 20; i++) {
-            game.waves.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 10 + 5,
-                speed: Math.random() * 0.5 + 0.5
+
+        // Create bubbles animation
+        function createBubbles() {
+            // Clear existing bubbles
+            bubblesContainer.innerHTML = '';
+            bubbles = [];
+            
+            // Height of the bubbles container is based on the fill level
+            bubblesContainer.style.height = (currentFillLevel / 100 * 100) + 'px';
+            
+            // Update the liquid height
+            liquidElement.style.height = (currentFillLevel / 100 * 100) + 'px';
+            
+            // Number of bubbles based on fill level
+            const bubbleCount = Math.floor(currentFillLevel / 10) + 3;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                
+                // Random size between 2 and 6 pixels
+                const size = Math.floor(Math.random() * 5) + 2;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                
+                // Random position
+                const left = Math.floor(Math.random() * 64) + 3;
+                const bottom = Math.floor(Math.random() * (bubblesContainer.offsetHeight - 10));
+                bubble.style.left = left + 'px';
+                bubble.style.bottom = bottom + 'px';
+                
+                // Random animation delay
+                bubble.style.animationDelay = (Math.random() * 2) + 's';
+                
+                bubblesContainer.appendChild(bubble);
+                bubbles.push({
+                    element: bubble,
+                    speed: Math.random() * 0.5 + 0.5,
+                    x: left,
+                    y: bottom
+                });
+            }
+        }
+
+        // Update bubbles positions
+        function updateBubbles() {
+            bubbles.forEach(bubble => {
+                bubble.y += bubble.speed;
+                if (bubble.y > bubblesContainer.offsetHeight) {
+                    bubble.y = 0;
+                    bubble.x = Math.floor(Math.random() * 64) + 3;
+                }
+                bubble.element.style.bottom = bubble.y + 'px';
+                bubble.element.style.left = bubble.x + 'px';
             });
         }
         
-        // Einfacher Perlin-Noise ähnlicher Zufallsgenerator
-        function noise(x, y) {
-            const seed = game.worldSeed;
-            const value = Math.sin(x * 0.1 + seed) * Math.cos(y * 0.1 + seed) * 0.5 + 0.5;
-            return value;
+        // Toggle the dripping animation
+        function toggleDripping(showDrip) {
+            dripElement.style.display = showDrip ? 'block' : 'none';
         }
-        
-        // Erstellt einen neuen Chunk an der angegebenen Position
-        function generateChunk(chunkX, chunkY) {
-            const chunk = {
-                x: chunkX,
-                y: chunkY,
-                tiles: []
-            };
-            
-            const chunkSize = game.map.chunkSize;
-            const worldX = chunkX * chunkSize * DISPLAY_TILE_SIZE;
-            const worldY = chunkY * chunkSize * DISPLAY_TILE_SIZE;
-            
-            for (let y = 0; y < chunkSize; y++) {
-                for (let x = 0; x < chunkSize; x++) {
-                    const absX = chunkX * chunkSize + x;
-                    const absY = chunkY * chunkSize + y;
-                    
-                    // Generiere Höhenwert
-                    const heightValue = noise(absX * 0.5, absY * 0.5);
-                    
-                    let tileType;
-                    
-                    // Bestimme Tile-Typ basierend auf Höhenwert
-                    if (heightValue < 0.4) {
-                        tileType = 'deepWater';
-                    } else if (heightValue < 0.45) {
-                        tileType = 'shallowWater';
-                    } else if (heightValue < 0.5) {
-                        tileType = 'sand';
-                    } else {
-                        tileType = 'grass';
-                    }
-                    
-                    // Speichere Tile-Information
-                    chunk.tiles.push({
-                        x: x * DISPLAY_TILE_SIZE + worldX,
-                        y: y * DISPLAY_TILE_SIZE + worldY,
-                        type: tileType,
-                        heightValue: heightValue
-                    });
-                    
-                    // Generiere zufällig einen Steg (nur am Übergang zum Wasser)
-                    if (tileType === 'sand' && noise(absX * 5, absY * 5) > 0.9) {
-                        // Prüfe, ob benachbartes Tile Wasser ist
-                        const leftValue = noise((absX - 1) * 0.5, absY * 0.5);
-                        const rightValue = noise((absX + 1) * 0.5, absY * 0.5);
-                        const upValue = noise(absX * 0.5, (absY - 1) * 0.5);
-                        const downValue = noise(absX * 0.5, (absY + 1) * 0.5);
-                        
-                        // Erstelle Steg nur wenn in der Nähe von Wasser
-                        if (leftValue < 0.45 || rightValue < 0.45 || upValue < 0.45 || downValue < 0.45) {
-                            chunk.tiles.push({
-                                x: x * DISPLAY_TILE_SIZE + worldX,
-                                y: y * DISPLAY_TILE_SIZE + worldY,
-                                type: 'dock'
-                            });
-                        }
-                    }
-                }
-            }
-            
-            return chunk;
+
+        // Initialize the game
+        function init() {
+            startButton.addEventListener('click', startGame);
+            restartButton.addEventListener('click', restartGame);
+            updateIdealRange();
         }
-        
-        // Prüft, ob ein Chunk bereits existiert
-        function getChunk(chunkX, chunkY) {
-            return game.map.chunks.find(chunk => chunk.x === chunkX && chunk.y === chunkY);
-        }
-        
-        // Aktualisiere die geladenen Chunks basierend auf der Schiffsposition
-        function updateChunks() {
-            const chunkSize = game.map.chunkSize;
-            const displaySize = DISPLAY_TILE_SIZE;
+
+        // Start the game
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            gameOverScreen.style.display = 'none';
             
-            // Bestimme die aktuellen Chunk-Koordinaten des Schiffs
-            const shipChunkX = Math.floor(game.ship.x / (chunkSize * displaySize));
-            const shipChunkY = Math.floor(game.ship.y / (chunkSize * displaySize));
+            resetGame();
+            gameActive = true;
             
-            // Lade Chunks im Umkreis
-            const range = game.map.loadedRange;
-            for (let dy = -range; dy <= range; dy++) {
-                for (let dx = -range; dx <= range; dx++) {
-                    const chunkX = shipChunkX + dx;
-                    const chunkY = shipChunkY + dy;
-                    
-                    // Erstelle Chunk, wenn er noch nicht existiert
-                    if (!getChunk(chunkX, chunkY)) {
-                        game.map.chunks.push(generateChunk(chunkX, chunkY));
-                    }
-                }
-            }
+            // Add click listener to bottle
+            bottle.addEventListener('click', fillBottle);
             
-            // Entferne Chunks, die zu weit entfernt sind
-            game.map.chunks = game.map.chunks.filter(chunk => {
-                const distance = Math.max(
-                    Math.abs(chunk.x - shipChunkX),
-                    Math.abs(chunk.y - shipChunkY)
-                );
-                return distance <= range + 1;
-            });
-        }
-        
-        // Zeichnet einen Chunk
-        function drawChunk(chunk) {
-            for (const tile of chunk.tiles) {
-                const screenX = tile.x - game.camera.x;
-                const screenY = tile.y - game.camera.y;
-                
-                // Prüfe, ob das Tile auf dem Bildschirm ist
-                if (screenX < -DISPLAY_TILE_SIZE || screenY < -DISPLAY_TILE_SIZE || 
-                    screenX > canvas.width || screenY > canvas.height) {
-                    continue;
-                }
-                
-                // Zeichne das Tile
-                ctx.fillStyle = COLORS[tile.type];
-                ctx.fillRect(screenX, screenY, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE);
-                
-                // Wasseranimation für tiefes und flaches Wasser
-                if (tile.type === 'deepWater' || tile.type === 'shallowWater') {
-                    const waveIntensity = tile.type === 'deepWater' ? 0.08 : 0.04;
-                    const waveTime = game.time * 0.003;
-                    const waveX = Math.sin(tile.x * 0.05 + waveTime) * waveIntensity;
-                    const waveY = Math.cos(tile.y * 0.05 + waveTime) * waveIntensity;
-                    
-                    // Wellen zeichnen
-                    ctx.fillStyle = COLORS.waterHighlight;
-                    ctx.globalAlpha = 0.3;
-                    ctx.fillRect(
-                        screenX + DISPLAY_TILE_SIZE * (0.2 + waveX),
-                        screenY + DISPLAY_TILE_SIZE * (0.2 + waveY),
-                        DISPLAY_TILE_SIZE * 0.2,
-                        DISPLAY_TILE_SIZE * 0.2
-                    );
-                    ctx.globalAlpha = 1.0;
-                }
-                
-                // Zeichne Schatten für Steg
-                if (tile.type === 'dock') {
-                    ctx.fillStyle = COLORS.dockShadow;
-                    ctx.fillRect(
-                        screenX + DISPLAY_TILE_SIZE * 0.1,
-                        screenY + DISPLAY_TILE_SIZE * 0.1,
-                        DISPLAY_TILE_SIZE * 0.8,
-                        DISPLAY_TILE_SIZE * 0.8
-                    );
-                }
-            }
-        }
-        
-        // Zeichnet die Schaumwellen
-        function drawWaves() {
-            ctx.globalAlpha = 0.3;
-            ctx.fillStyle = "#ffffff";
-            
-            for (const wave of game.waves) {
-                const screenX = wave.x - game.camera.x % canvas.width;
-                const screenY = wave.y - game.camera.y % canvas.height;
-                
-                // Welle zeichnen
-                ctx.beginPath();
-                ctx.arc(screenX, screenY, wave.size * (Math.sin(game.time * 0.01) * 0.2 + 0.8), 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Wellen bewegen
-                wave.x += Math.cos(game.ship.rotation) * wave.speed;
-                wave.y += Math.sin(game.ship.rotation) * wave.speed;
-                
-                // Wellen, die aus dem Bildschirm laufen, auf der anderen Seite wieder eintreten lassen
-                if (screenX < -wave.size) wave.x += canvas.width + wave.size * 2;
-                if (screenX > canvas.width + wave.size) wave.x -= canvas.width + wave.size * 2;
-                if (screenY < -wave.size) wave.y += canvas.height + wave.size * 2;
-                if (screenY > canvas.height + wave.size) wave.y -= canvas.height + wave.size * 2;
-            }
-            
-            ctx.globalAlpha = 1.0;
-        }
-        
-        // Zeichnet das Schiff
-        function drawShip() {
-            const shipX = game.ship.x - game.camera.x;
-            const shipY = game.ship.y - game.camera.y;
-            
-            // Schiffanimation (leichtes Schaukeln)
-            const bobOffset = Math.sin(game.time * 0.02) * 2;
-            
-            ctx.save();
-            ctx.translate(shipX + game.ship.width / 2, shipY + game.ship.height / 2 + bobOffset);
-            ctx.rotate(game.ship.rotation);
-            
-            // Schiffsrumpf
-            ctx.fillStyle = COLORS.shipHull;
-            ctx.beginPath();
-            ctx.moveTo(-game.ship.width / 2, 0);
-            ctx.lineTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.5, game.ship.height / 2);
-            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.5, game.ship.height / 2);
-            ctx.lineTo(game.ship.width / 2, 0);
-            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.5, -game.ship.height / 2);
-            ctx.lineTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.5, -game.ship.height / 2);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Deck
-            ctx.fillStyle = COLORS.shipDeck;
-            ctx.beginPath();
-            ctx.moveTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.6, -game.ship.height / 2 + DISPLAY_TILE_SIZE * 0.2);
-            ctx.lineTo(-game.ship.width / 2 + DISPLAY_TILE_SIZE * 0.6, game.ship.height / 2 - DISPLAY_TILE_SIZE * 0.2);
-            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.6, game.ship.height / 2 - DISPLAY_TILE_SIZE * 0.2);
-            ctx.lineTo(game.ship.width / 2 - DISPLAY_TILE_SIZE * 0.6, -game.ship.height / 2 + DISPLAY_TILE_SIZE * 0.2);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Schiffskabine
-            ctx.fillStyle = COLORS.shipCabin;
-            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.6, -DISPLAY_TILE_SIZE * 0.4, DISPLAY_TILE_SIZE * 1.2, DISPLAY_TILE_SIZE * 0.8);
-            
-            // Kabinenfenster
-            ctx.fillStyle = COLORS.shipCabinWindow;
-            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.4, -DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25);
-            ctx.fillRect(DISPLAY_TILE_SIZE * 0.15, -DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25, DISPLAY_TILE_SIZE * 0.25);
-            
-            // Mast
-            ctx.fillStyle = COLORS.shipMast;
-            ctx.fillRect(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 1.5, DISPLAY_TILE_SIZE * 0.2, DISPLAY_TILE_SIZE * 1.5);
-            
-            // Segel (mit Animation)
-            const sailWave = Math.sin(game.time * 0.03) * 0.1;
-            
-            ctx.fillStyle = COLORS.shipSailShadow;
-            ctx.beginPath();
-            ctx.moveTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 1.5);
-            ctx.bezierCurveTo(
-                DISPLAY_TILE_SIZE * (0.5 + sailWave), -DISPLAY_TILE_SIZE * 1.3,
-                DISPLAY_TILE_SIZE * (0.6 + sailWave), -DISPLAY_TILE_SIZE * 0.8,
-                DISPLAY_TILE_SIZE * 0.6, -DISPLAY_TILE_SIZE * 0.5
-            );
-            ctx.lineTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
-            ctx.closePath();
-            ctx.fill();
-            
-            ctx.fillStyle = COLORS.shipSail;
-            ctx.beginPath();
-            ctx.moveTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 1.5);
-            ctx.bezierCurveTo(
-                DISPLAY_TILE_SIZE * (0.4 + sailWave), -DISPLAY_TILE_SIZE * 1.2,
-                DISPLAY_TILE_SIZE * (0.5 + sailWave), -DISPLAY_TILE_SIZE * 0.7,
-                DISPLAY_TILE_SIZE * 0.5, -DISPLAY_TILE_SIZE * 0.5
-            );
-            ctx.lineTo(-DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Zweites Segel (klein)
-            ctx.fillStyle = COLORS.shipSailShadow;
-            ctx.beginPath();
-            ctx.moveTo(DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
-            ctx.bezierCurveTo(
-                DISPLAY_TILE_SIZE * (0.5 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.45,
-                DISPLAY_TILE_SIZE * (0.5 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.2,
-                DISPLAY_TILE_SIZE * 0.4, 0
-            );
-            ctx.lineTo(DISPLAY_TILE_SIZE * 0.1, 0);
-            ctx.closePath();
-            ctx.fill();
-            
-            ctx.fillStyle = COLORS.shipSail;
-            ctx.beginPath();
-            ctx.moveTo(DISPLAY_TILE_SIZE * 0.1, -DISPLAY_TILE_SIZE * 0.5);
-            ctx.bezierCurveTo(
-                DISPLAY_TILE_SIZE * (0.4 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.4,
-                DISPLAY_TILE_SIZE * (0.4 + sailWave * 0.5), -DISPLAY_TILE_SIZE * 0.1,
-                DISPLAY_TILE_SIZE * 0.3, 0
-            );
-            ctx.lineTo(DISPLAY_TILE_SIZE * 0.1, 0);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Bugsprit
-            ctx.fillStyle = COLORS.shipMast;
-            ctx.save();
-            ctx.rotate(Math.PI / 8);
-            ctx.fillRect(0, 0, DISPLAY_TILE_SIZE * 0.1, DISPLAY_TILE_SIZE * 0.7);
-            ctx.restore();
-            
-            ctx.restore();
-        }
-        
-        // Prüft Kollision mit Land
-        function checkCollision() {
-            const shipX = game.ship.x;
-            const shipY = game.ship.y;
-            
-            for (const chunk of game.map.chunks) {
-                for (const tile of chunk.tiles) {
-                    if (tile.type !== 'deepWater' && tile.type !== 'shallowWater') {
-                        const dx = shipX - tile.x;
-                        const dy = shipY - tile.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if (distance < DISPLAY_TILE_SIZE) {
-                            // Bei Landkollision die Geschwindigkeit reduzieren
-                            game.ship.speed = 0.5;
-                            return true;
-                        }
-                    }
-                }
-            }
-            
-            // Bei keiner Kollision normale Geschwindigkeit
-            game.ship.speed = parseFloat(speedControl.value);
-            return false;
-        }
-        
-        // Aktualisiert die Spiellogik
-        function update() {
-            game.time++;
-            
-            // Aktualisiere Schiffsgeschwindigkeit vom Schieberegler
-            game.ship.speed = parseFloat(speedControl.value);
-            
-            // Automatisches Segeln, wenn aktiviert
-            if (autoSailCheckbox.checked) {
-                // Ändere den Kurs leicht und zufällig
-                game.ship.autoSailAngle += (Math.random() * 0.04 - 0.02);
-                
-                // Ab und zu den Kurs stärker ändern
-                if (Math.random() < 0.01) {
-                    game.ship.autoSailAngle += (Math.random() * 0.2 - 0.1);
-                }
-                
-                // An Landmassen vorbei navigieren
-                const lookAheadDistance = DISPLAY_TILE_SIZE * 5;
-                const lookAheadX = game.ship.x + Math.cos(game.ship.rotation) * lookAheadDistance;
-                const lookAheadY = game.ship.y + Math.sin(game.ship.rotation) * lookAheadDistance;
-                
-                for (const chunk of game.map.chunks) {
-                    for (const tile of chunk.tiles) {
-                        if (tile.type !== 'deepWater' && tile.type !== 'shallowWater') {
-                            const dx = lookAheadX - tile.x;
-                            const dy = lookAheadY - tile.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            
-                            if (distance < DISPLAY_TILE_SIZE * 2) {
-                                // Hinderniserkennung: Kurs ändern
-                                game.ship.autoSailAngle += Math.PI / 4 * (Math.random() < 0.5 ? 1 : -1);
-                            }
-                        }
-                    }
-                }
-                
-                // Rotationswinkel aktualisieren
-                game.ship.rotation += game.ship.autoSailAngle;
-                
-                // Stabilisiere den Kurs leicht
-                game.ship.autoSailAngle *= 0.95;
-                
-                // Bewege Schiff in die aktuelle Richtung
-                game.ship.x += Math.cos(game.ship.rotation) * game.ship.speed;
-                game.ship.y += Math.sin(game.ship.rotation) * game.ship.speed;
-            }
-            // Manuelle Bewegung zum Ziel
-            else if (game.ship.targetX !== null && game.ship.targetY !== null) {
-                const dx = game.ship.targetX - game.ship.x;
-                const dy = game.ship.targetY - game.ship.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance > 5) {
-                    // Berechne Rotation
-                    game.ship.rotation = Math.atan2(dy, dx);
-                    
-                    // Bewege Schiff in die Richtung
-                    game.ship.x += (dx / distance) * game.ship.speed;
-                    game.ship.y += (dy / distance) * game.ship.speed;
-                } else {
-                    // Ziel erreicht
-                    game.ship.targetX = null;
-                    game.ship.targetY = null;
-                }
-            }
-            
-            // Kollisionsprüfung
-            checkCollision();
-            
-            // Aktualisiere Kamera, um das Schiff zu folgen
-            game.camera.x = game.ship.x - canvas.width / 2 + game.ship.width / 2;
-            game.camera.y = game.ship.y - canvas.height / 2 + game.ship.height / 2;
-            
-            // Aktualisiere Chunks basierend auf der Schiffsposition
-            updateChunks();
-        }
-        
-        // Hauptzeichenfunktion
-        function draw() {
-            // Lösche den Canvas
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Zeichne alle Chunks
-            for (const chunk of game.map.chunks) {
-                drawChunk(chunk);
-            }
-            
-            // Zeichne Wellen
-            drawWaves();
-            
-            // Zeichne das Schiff
-            drawShip();
-        }
-        
-        // Game Loop
-        function gameLoop() {
-            update();
-            draw();
+            // Start the animation loop
             requestAnimationFrame(gameLoop);
         }
-        
-        // Event-Listener für Mausklicks und Touch
-        function handlePointerDown(e) {
-            e.preventDefault();
+
+        // Game loop
+        function gameLoop() {
+            if (gameActive) {
+                updateBubbles();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+
             
-            // Wenn automatisches Segeln aktiv ist, ignoriere manuelle Eingaben
-            if (autoSailCheckbox.checked) {
+            // Update displays
+            levelBar.style.width = currentFillLevel + '%';
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = level;
+            
+            // Reset lives display
+            updateLivesDisplay();
+            
+            // Create initial bubbles
+            createBubbles();
+        }
+
+        // Update difficulty based on current level
+        function updateDifficulty() {
+            // As level increases, the ideal range gets smaller
+            idealMin = 80 - Math.min(level - 1, 15);
+            idealMax = 100 - Math.min(level - 1, 10);
+            updateIdealRange();
+        }
+
+        // Toggle filling when bottle is clicked
+        function fillBottle() {
+            if (!gameActive) return;
+            
+            if (!isFillingActive) {
+                // Start filling
+                isFillingActive = true;
+                toggleDripping(true);
+                
+                // Set interval to continuously fill the bottle
+                fillInterval = setInterval(() => {
+                    // Fill amount based on level
+                    const fillAmount = Math.floor(Math.random() * (2 + level/2)) + 1;
+                    currentFillLevel += fillAmount;
+                    
+                    // Update fill level display
+                    levelBar.style.width = Math.min(currentFillLevel, 100) + '%';
+                    
+                    // Update bubbles
+                    createBubbles();
+                    
+                    // Check if the bottle has burst
+                    if (currentFillLevel > 100) {
+                        stopFilling();
+                        burstBottle();
+                    }
+                }, 100);
+            } else {
+                // Stop filling and check result
+                stopFilling();
+                
+                // Check if the bottle is filled to ideal range
+                if (currentFillLevel >= idealMin && currentFillLevel <= idealMax) {
+                    completeBottle();
+                }
+                // Not in ideal range but not burst either
+                else if (currentFillLevel <= 100) {
+                    // No points but no penalty either
+                    resetBottle();
+                }
+            }
+        }
+        
+        // Stop the filling process
+        function stopFilling() {
+            isFillingActive = false;
+            toggleDripping(false);
+            if (fillInterval) {
+                clearInterval(fillInterval);
+                fillInterval = null;
+            }
+        }
+        
+        // Reset the bottle for next attempt
+        function resetBottle() {
+            currentFillLevel = 0;
+            levelBar.style.width = '0%';
+            createBubbles();
+        }
+
+        // Complete the bottle successfully
+        function completeBottle() {
+            // Add points based on how close to ideal max
+            const accuracy = 100 - Math.abs(idealMax - currentFillLevel);
+            const points = Math.floor(accuracy / 10) + level;
+            score += points;
+            scoreDisplay.textContent = score;
+            
+            // Reset for next bottle
+            currentFillLevel = 0;
+            levelBar.style.width = '0%';
+            
+            // Increase level every 3 successful bottles
+            if (score % 3 === 0) {
+                level++;
+                levelDisplay.textContent = level;
+                updateDifficulty();
+            }
+            
+            // Create new bubbles
+            createBubbles();
+        }
+
+        // Burst the bottle
+        function burstBottle() {
+            // Stop filling if still active
+            stopFilling();
+            
+            // Create burst effect
+            createBurstEffect();
+            
+            // Reduce lives
+            lives--;
+            updateLivesDisplay();
+            
+            // Check if game over
+            if (lives <= 0) {
+                endGame();
                 return;
             }
             
-            let x, y;
+            // Reset for next bottle
+            currentFillLevel = 0;
+            levelBar.style.width = '0%';
             
-            // Unterschiedliche Behandlung für Touch und Maus
-            if (e.type === 'touchstart') {
-                x = e.touches[0].clientX;
-                y = e.touches[0].clientY;
-            } else {
-                x = e.clientX;
-                y = e.clientY;
-            }
-            
-            // Konvertiere Bildschirmposition zu Weltposition
-            game.ship.targetX = x + game.camera.x;
-            game.ship.targetY = y + game.camera.y;
+            // Create new bubbles
+            createBubbles();
         }
-        
-        // Event-Listener registrieren
-        canvas.addEventListener('mousedown', handlePointerDown);
-        canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
-        
-        // Event-Listener für Steuerungselemente
-        autoSailCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                // Ziel zurücksetzen wenn automatisches Segeln aktiviert wird
-                game.ship.targetX = null;
-                game.ship.targetY = null;
+
+        // Create pixelated burst effect
+        function createBurstEffect() {
+            burstElement.style.display = 'block';
+            burstElement.innerHTML = '';
+            burstParticles = [];
+            
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'pixel';
+                
+                // Set initial position at center of bottle
+                const startX = 35;
+                const startY = 70;
+                
+                pixel.style.left = startX + 'px';
+                pixel.style.top = startY + 'px';
+                
+                burstElement.appendChild(pixel);
+                
+                // Random angle and speed
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 2;
+                
+                burstParticles.push({
+                    element: pixel,
+                    x: startX,
+                    y: startY,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    gravity: 0.2,
+                    opacity: 1
+                });
             }
-        });
-        
-        // Initialisiere einige Chunks um das Schiff herum
-        updateChunks();
-        
-        // Starte das Spiel
-        gameLoop();
+            
+            // Animate particles
+            animateBurst();
+        }
+
+        // Animate the bursting particles
+        function animateBurst() {
+            let stillAnimating = false;
+            
+            burstParticles.forEach(particle => {
+                // Update position
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += particle.gravity;
+                particle.opacity -= 0.02;
+                
+                // Update CSS
+                particle.element.style.left = particle.x + 'px';
+                particle.element.style.top = particle.y + 'px';
+                particle.element.style.opacity = Math.max(0, particle.opacity);
+                
+                if (particle.opacity > 0) {
+                    stillAnimating = true;
+                }
+            });
+            
+            if (stillAnimating) {
+                requestAnimationFrame(animateBurst);
+            } else {
+                burstElement.style.display = 'none';
+            }
+        }
+
+        // Update the lives display
+        function updateLivesDisplay() {
+            livesDisplay.innerHTML = '';
+            for (let i = 0; i < lives; i++) {
+                const life = document.createElement('div');
+                life.className = 'life';
+                livesDisplay.appendChild(life);
+            }
+        }
+
+        // End the game
+        function endGame() {
+            gameActive = false;
+            stopFilling();
+            bottle.removeEventListener('click', fillBottle);
+            
+            // Show game over screen
+            gameScreen.style.display = 'none';
+            gameOverScreen.style.display = 'flex';
+            finalScoreDisplay.textContent = score;
+        }
+
+        // Restart the game
+        function restartGame() {
+            startGame();
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+
+        // Add CSS animation for bubbles and dripping
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes float {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+                100% { transform: translateY(0); }
+            }
+            
+            @keyframes drip {
+                0% { height: 0; }
+                50% { height: 20px; }
+                100% { height: 0; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
     </script>
 </body>
 </html>
