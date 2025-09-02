@@ -67,3 +67,30 @@ canvas {
         font-size: 18px;
     }
 }
+
+
+/* Galerie (Collage-Layout) */
+.gallery {
+  background-color: #f7b766;
+  padding: 3rem 2rem;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 200px; /* feste Höhe */
+  gap: 1rem;
+}
+
+.gallery-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.gallery-grid img:hover {
+  transform: scale(1.05);
+}
+
