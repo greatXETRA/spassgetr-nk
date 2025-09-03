@@ -94,3 +94,25 @@ canvas {
   transform: scale(1.05);
 }
 
+/* FAQ / KI-Bereich */
+.faq {
+  background: #fff8f0;
+  color: #222;
+  padding: 4rem 2rem;
+}
+.faq-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+}
+.faq h2 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin-bottom: 1rem;
+  color: #c95c00;
+}
+.faq p {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
