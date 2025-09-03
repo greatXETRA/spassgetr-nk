@@ -110,6 +110,32 @@
     .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 28px rgba(0,0,0,.22); }
 
     @media (prefers-reduced-motion: reduce) { .tile:hover img, .btn:hover { transform: none !important; } }
+
+    /* ---------- FAQ Abschnitt ---------- */
+.faq {
+  background: var(--brand);        /* gleicher Hintergrund wie die anderen Abschnitte */
+  display: flex;
+  justify-content: center;         /* zentriert den inneren Container */
+  padding: 4rem 1.5rem;
+}
+
+.faq-inner {
+  max-width: 800px;                /* begrenzt die Breite, damit Text nicht zu lang wird */
+  text-align: left;
+}
+
+.faq h2 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.faq p {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
   </style>
 </head>
 <body>
