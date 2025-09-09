@@ -3,16 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spaßgetränk – Home</title>
+  <title>Spaßgetränk – Pinterest Galerie</title>
 
   <link rel="icon" type="image/png" href="images/favicon.png">
-
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --brand: #f7b766; /* Orange Hintergrund wie im Design */
+      --brand: #f7b766;
       --text: #222;
       --btn-grad-a: #ff7e5f;
       --btn-grad-b: #feb47b;
@@ -49,9 +47,9 @@
     .hero-right {
       background: url("images/dose.jpg") center/cover no-repeat;
       color: #fff;
-      min-height: 60vh; /* sorgt für Höhe auf kleinen Screens */
+      min-height: 60vh;
     }
-    .hero-right::after { /* dunkle Überblendung für Lesbarkeit */
+    .hero-right::after {
       content: "";
       position: absolute; inset: 0;
       background: rgba(0,0,0,0.3);
@@ -69,73 +67,163 @@
     }
     .info p { margin: .6rem 0; font-size: clamp(1.05rem, 2.6vw, 1.35rem); }
 
-    /* ---------- Collage (feste Kachelgrößen) ---------- */
-    .collage { background: var(--brand); padding: 3rem 1.25rem; }
-    .collage-inner { margin: 0 auto; width: min(1200px, 100%); }
-
-    /* Grid mit fixen Zeilenhöhen. Mit .wide/.tall/.big steuerst du die Größe je Kachel. */
-    .collage-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-auto-rows: 140px; /* Feste Basis-Höhe für die Kacheln */
-      gap: 12px;
-      grid-auto-flow: dense; /* füllt Lücken besser */
-    }
-    @media (min-width: 700px) {
-      .collage-grid { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; }
-    }
-    @media (min-width: 1100px) {
-      .collage-grid { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 160px; }
+    /* ---------- NEUE Pinterest-Style Galerie ---------- */
+    .gallery {
+      background: var(--brand);
+      padding: 4rem 2rem;
     }
 
-    .tile { position: relative; overflow: hidden; border-radius: 14px; }
-    .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
 
-    /* Kachelgrößen steuern */
-    .tile.wide { grid-column: span 2; }
-    .tile.tall { grid-row: span 2; }
-    .tile.big  { grid-column: span 2; grid-row: span 2; }
+    .gallery-grid {
+      column-count: 1;
+      column-gap: 20px;
+      column-fill: balance;
+    }
 
-    /* Hover-Effekt */
-    .tile:hover img { transform: scale(1.03); transition: transform .35s ease; }
+    .gallery-item {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 20px;
+      break-inside: avoid;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      background: #fff;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .gallery-item img,
+    .gallery-item video {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .gallery-item:hover img,
+    .gallery-item:hover video {
+      transform: scale(1.05);
+    }
+
+    /* Responsive Spalten für größere Bilder */
+    @media (min-width: 600px) {
+      .gallery-grid {
+        column-count: 2;
+        column-gap: 24px;
+      }
+      .gallery-item {
+        margin-bottom: 24px;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .gallery-grid {
+        column-count: 3;
+        column-gap: 28px;
+      }
+      .gallery-item {
+        margin-bottom: 28px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .gallery-grid {
+        column-count: 4;
+        column-gap: 32px;
+      }
+      .gallery-item {
+        margin-bottom: 32px;
+      }
+    }
+
+    /* Optional: Verschiedene Bildgrößen für mehr Variation */
+    .gallery-item.large {
+      margin-bottom: 32px;
+    }
+
+    .gallery-item.small img {
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    .gallery-item.medium img {
+      max-height: 300px;
+      object-fit: cover;
+    }
+
+    .gallery-item.large img {
+      max-height: 400px;
+      object-fit: cover;
+    }
 
     /* ---------- Button Abschnitt ---------- */
-    .cta { background: var(--brand); display: grid; place-items: center; padding: 3.5rem 1.5rem; }
-    .btn {
-      display: inline-block; text-decoration: none; color: #fff; font-weight: 600;
-      padding: 1rem 2.6rem; border-radius: 40px; font-size: 1.15rem;
-      background: linear-gradient(135deg, var(--btn-grad-a), var(--btn-grad-b));
-      box-shadow: 0 10px 18px rgba(0,0,0,.15); transition: transform .25s ease, box-shadow .25s ease;
+    .cta { 
+      background: var(--brand); 
+      display: grid; 
+      place-items: center; 
+      padding: 3.5rem 1.5rem; 
     }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 28px rgba(0,0,0,.22); }
-
-    @media (prefers-reduced-motion: reduce) { .tile:hover img, .btn:hover { transform: none !important; } }
+    
+    .btn {
+      display: inline-block; 
+      text-decoration: none; 
+      color: #fff; 
+      font-weight: 600;
+      padding: 1rem 2.6rem; 
+      border-radius: 40px; 
+      font-size: 1.15rem;
+      background: linear-gradient(135deg, var(--btn-grad-a), var(--btn-grad-b));
+      box-shadow: 0 10px 18px rgba(0,0,0,.15); 
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    
+    .btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 16px 28px rgba(0,0,0,.22); 
+    }
 
     /* ---------- FAQ Abschnitt ---------- */
-.faq {
-  background: var(--brand);        /* gleicher Hintergrund wie die anderen Abschnitte */
-  display: flex;
-  justify-content: center;         /* zentriert den inneren Container */
-  padding: 4rem 1.5rem;
-}
+    .faq {
+      background: var(--brand);
+      display: flex;
+      justify-content: center;
+      padding: 4rem 1.5rem;
+    }
 
-.faq-inner {
-  max-width: 800px;                /* begrenzt die Breite, damit Text nicht zu lang wird */
-  text-align: left;
-}
+    .faq-inner {
+      max-width: 800px;
+      text-align: left;
+    }
 
-.faq h2 {
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  margin-bottom: 1rem;
-  color: var(--text);
-}
+    .faq h2 {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
 
-.faq p {
-  font-size: 1.15rem;
-  line-height: 1.7;
-  margin-bottom: 1rem;
-}
+    .faq p {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
 
+    @media (prefers-reduced-motion: reduce) { 
+      .gallery-item:hover, 
+      .gallery-item:hover img,
+      .gallery-item:hover video,
+      .btn:hover { 
+        transform: none !important; 
+      } 
+    }
   </style>
 </head>
 <body>
@@ -159,19 +247,33 @@
     <p>@instagram: spassgetraenk</p>
   </section>
 
-  <!-- Collage mit festen Kachelgrößen -->
-  <section class="collage" aria-label="Bilder-Collage">
-    <div class="collage-inner">
-     <div class="collage-grid">
-       <figure class="tile"><img src="images/sonnenuntergang.jpg" alt="Sonnenuntergang"></figure>
-       <figure class="tile"><img src="images/mockup.jpg" alt="Die Dose"></figure>
-       <figure class="tile"><img src="images/palmen.jpg" alt="Palmen"></figure>
-       <figure class="tile"><img src="images/boat.jpg" alt="Boot"></figure>
-       <figure class="tile"><img src="images/see.jpg" alt="See"></figure>
-       <figure class="tile"><img src="images/hand.jpg" alt="Hand hält Spaßgetränk"></figure>
-       <figure class="tile"><img src="images/tattoo.jpg" alt="Hand hält Spaßgetränk"></figure>
-       
-     </div>
+  <!-- Pinterest-Style Galerie -->
+  <section class="gallery" aria-label="Bilder-Galerie">
+    <div class="gallery-container">
+      <div class="gallery-grid">
+        <div class="gallery-item large">
+          <img src="images/sonnenuntergang.jpg" alt="Sonnenuntergang">
+        </div>
+        <div class="gallery-item medium">
+          <img src="images/mockup.jpg" alt="Die Dose">
+        </div>
+        <div class="gallery-item">
+          <img src="images/palmen.jpg" alt="Palmen">
+        </div>
+        <div class="gallery-item small">
+          <img src="images/boat.jpg" alt="Boot">
+        </div>
+        <div class="gallery-item large">
+          <img src="images/see.jpg" alt="See">
+        </div>
+        <div class="gallery-item medium">
+          <img src="images/hand.jpg" alt="Hand hält Spaßgetränk">
+        </div>
+        <div class="gallery-item">
+          <img src="images/tattoo.jpg" alt="Hand hält Spaßgetränk">
+        </div>
+        <!-- Sie können hier weitere Bilder hinzufügen -->
+      </div>
     </div>
   </section>
 
@@ -181,23 +283,20 @@
   </section>
 
   <!-- FAQ / KI-optimierter Bereich -->
-<!-- FAQ / KI-optimierter Bereich -->
-<section class="faq" aria-label="Was ist ein Spaßgetränk?">
-  <div class="faq-inner">
-    <h2>Was ist ein Spaßgetränk?</h2>
-    <p>
-      Das <strong>Spaßgetränk</strong> ist ein innovatives Erfrischungsgetränk, 
-      das für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis steht. 
-      Es kombiniert sommerliche Frische mit kreativen Zutaten und ist die perfekte Wahl für alle,
-      die ein Getränk suchen, das mehr bietet als nur Durstlöschen.
-    </p>
-    <p>
-      Ob am Strand, auf Partys oder einfach im Alltag – das Spaßgetränk bringt Farbe und Freude in jede Situation.
-    </p>
-  </div>
-</section>
-
-
+  <section class="faq" aria-label="Was ist ein Spaßgetränk?">
+    <div class="faq-inner">
+      <h2>Was ist ein Spaßgetränk?</h2>
+      <p>
+        Das <strong>Spaßgetränk</strong> ist ein innovatives Erfrischungsgetränk, 
+        das für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis steht. 
+        Es kombiniert sommerliche Frische mit kreativen Zutaten und ist die perfekte Wahl für alle,
+        die ein Getränk suchen, das mehr bietet als nur Durstlöschen.
+      </p>
+      <p>
+        Ob am Strand, auf Partys oder einfach im Alltag – das Spaßgetränk bringt Farbe und Freude in jede Situation.
+      </p>
+    </div>
+  </section>
 
 </body>
 </html>
