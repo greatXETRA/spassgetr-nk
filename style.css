@@ -126,4 +126,8 @@ canvas {
   display: block;
 }
 
-
+/* Video-Kachel vergrößern */
+.video-tile.big {
+  grid-column: span 3; /* Macht das Video 3 Spalten breit */
+  grid-row: span 3;    /* Macht das Video 3 Zeilen hoch */
+}
