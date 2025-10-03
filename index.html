@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+
+  
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q14M1DFDCW"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Q14M1DFDCW');
+  </script>
+
+  <script>
+(function() {
+  const ref = document.referrer || '';
+  let host = '';
+  try { host = new URL(ref).hostname; } catch(e) {}
+  if (/openai/i.test(host)) {
+    gtag('event', 'visit_from_chatgpt', {
+      method: 'referrer',
+      referrer_host: host || 'unknown'
+    });
+  }
+})();
+</script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Spaßgetränk – Das Original</title>
