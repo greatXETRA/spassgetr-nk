@@ -37,8 +37,35 @@
         <span class="captcha__footer-text">Privacy&nbsp;·&nbsp;Terms</span>
       </div>
     </div>
+
+    <section class="audit" id="audit" aria-labelledby="audit-title" hidden>
+      <h2 id="audit-title" class="audit__title">Bot-Audit</h2>
+      <p class="audit__intro">Eine letzte Frage, rein zur Sicherheit.</p>
+
+      <div class="audit__question-wrap">
+        <p id="auditQuestion" class="audit__question" aria-live="polite"></p>
+      </div>
+
+      <form id="auditForm" class="audit__form">
+        <label for="auditAnswer" class="visually-hidden">Deine Antwort</label>
+        <textarea
+          id="auditAnswer"
+          class="audit__textarea"
+          rows="3"
+          placeholder="Deine Antwort…"
+          disabled
+          required
+        ></textarea>
+        <button type="submit" id="auditSubmit" class="audit__submit" disabled>Antworten</button>
+      </form>
+
+      <div id="auditLoader" class="audit__loader" hidden aria-hidden="true"></div>
+
+      <div id="auditResult" class="audit__result" role="status" aria-live="polite" hidden></div>
+    </section>
   </main>
 
   <script src="script.js"></script>
+  <script src="audit.js"></script>
 </body>
 </html>
