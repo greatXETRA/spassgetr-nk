@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security Check</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="card" role="main" aria-labelledby="card-title">
+    <h1 id="card-title" class="card__title">Security Check</h1>
+    <p class="card__subtitle">Please verify that you are human</p>
+
+    <div class="captcha" id="captcha">
+      <button
+        type="button"
+        id="captchaToggle"
+        class="captcha__control"
+        role="checkbox"
+        aria-checked="false"
+        aria-describedby="captcha-status"
+      >
+        <span class="captcha__box" aria-hidden="true">
+          <span class="captcha__spinner"></span>
+          <svg class="captcha__cross" viewBox="0 0 24 24" focusable="false">
+            <path d="M6 6 L18 18 M18 6 L6 18" />
+          </svg>
+        </span>
+      </button>
+
+      <span class="captcha__label">I'm not a robot</span>
+
+      <span id="captcha-status" class="captcha__status" role="status" aria-live="polite"></span>
+
+      <div class="captcha__footer" aria-hidden="true">
+        <span class="captcha__footer-text">Privacy&nbsp;·&nbsp;Terms</span>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
