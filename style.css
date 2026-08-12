@@ -1,101 +1,290 @@
 /* ==========================================================================
-   Grundlegende Stile
+   Custom Properties & Reset
    ========================================================================== */
+:root {
+  --brand: #f7b766;
+  --bg-page: #fdf6ef;
+  --text: #222;
+  --btn-grad-a: #ff7e5f;
+  --btn-grad-b: #feb47b;
+  --header-bg: rgba(253, 246, 239, 0.85);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-strong: 0 16px 40px rgba(0, 0, 0, 0.2);
+}
 
-html, body {
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
   margin: 0;
-  padding: 0;
-  /* Optional: Eine Schriftart für die ganze Seite definieren */
-  font-family: sans-serif; 
+  font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg-page);
+  scroll-behavior: smooth;
 }
 
-canvas {
-  display: block;
+img, video { max-width: 100%; }
+
+a { color: inherit; }
+
+section[id] { scroll-margin-top: 84px; }
+
+/* ---------- Utilities ---------- */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 12px;
+  background: var(--text);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 0 0 8px 8px;
+  z-index: 1000;
+  text-decoration: none;
+  font-weight: 600;
+  transition: top 0.2s ease;
+}
+.skip-link:focus { top: 0; }
+
+:focus-visible {
+  outline: 3px solid var(--btn-grad-a);
+  outline-offset: 3px;
+}
 
 /* ==========================================================================
    Header & Navigation
    ========================================================================== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(34, 34, 34, 0.06);
+}
 
-header {
+.site-header__inner {
+  max-width: 1400px;
+  margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   align-items: center;
-  padding: 20px;
-  position: relative; /* Wichtig für die Positionierung des mobilen Menüs */
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
 }
 
-.menu {
-  display: flex;
-  gap: 20px;
-  list-style: none; /* Entfernt Aufzählungspunkte, falls du <ul> verwendest */
-  margin: 0;
-  padding: 0;
-}
-
-.menu a {
-  color: #FF9494;
+.logo {
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
   text-decoration: none;
-  font-size: 18px;
-  font-weight: bold;
-  transition: color 0.3s ease;
+  color: var(--text);
 }
 
-.menu a:hover {
-  color: #FFD1D1;
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
 }
 
-.menu-toggle {
-  display: none; /* Standardmäßig auf Desktops ausgeblendet */
-  font-size: 28px;
-  cursor: pointer;
-  color: #FF9494;
-  z-index: 1001; /* Stellt sicher, dass der Button über dem Menü liegt */
+.nav a {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  padding: 6px 2px;
+  position: relative;
 }
 
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 100%;
+  bottom: 0;
+  height: 2px;
+  background: var(--btn-grad-a);
+  transition: right 0.25s ease;
+}
+
+.nav a:hover::after,
+.nav a:focus-visible::after { right: 0; }
 
 /* ==========================================================================
-   Pinterest-Style Galerie (Masonry Layout)
+   Hero (Split-Screen)
    ========================================================================== */
+.hero { display: grid; min-height: 100vh; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .hero { grid-template-columns: 1fr 1fr; } }
 
+.hero-left,
+.hero-right { position: relative; display: grid; place-items: center; }
+
+.hero-left {
+  background: var(--brand);
+  padding: 2rem;
+}
+
+.hero-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  letter-spacing: 0.02em;
+}
+
+.hero-right {
+  background: url("images/dose.jpg") center/cover no-repeat;
+  color: #fff;
+  min-height: 60vh;
+}
+.hero-right::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 100%);
+}
+
+.hero-overlay { position: relative; z-index: 1; width: min(85%, 700px); }
+.hero-overlay__tagline { font-size: clamp(1rem, 2.5vw, 1.25rem); margin: 0; opacity: .95; min-height: 1.5em; }
+
+/* ==========================================================================
+   Info-Blöcke
+   ========================================================================== */
+.info {
+  background: var(--brand);
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+.info p { margin: .6rem 0; font-size: clamp(1.05rem, 2.6vw, 1.35rem); }
+.info a { text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
+.info a:hover { opacity: .8; }
+
+/* ==========================================================================
+   Pinterest-Style Galerie
+   ========================================================================== */
 .gallery {
-  background-color: #f7b766;
-  padding: 3rem 1.5rem; /* Etwas mehr Abstand auf mobilen Geräten */
+  background: var(--brand);
+  padding: 4rem 2rem;
+}
+
+.gallery-container {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .gallery-grid {
-  /* Spalten-Layout für den versetzten Effekt */
-  column-count: 2;   /* 2 Spalten für mobile Ansicht */
-  column-gap: 1rem;
+  column-count: 1;
+  column-gap: 20px;
+  column-fill: balance;
 }
 
 .gallery-item {
-  margin-bottom: 1rem;
-  break-inside: avoid; /* WICHTIG: Verhindert, dass Bilder zerschnitten werden */
-  border-radius: 12px;
-  overflow: hidden;    /* Stellt sicher, dass der Radius auf das Bild angewendet wird */
-  transition: transform 0.3s ease;
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 20px;
+  break-inside: avoid;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: #fff;
 }
 
-.gallery-item:hover {
-    transform: scale(1.02); /* Leichter Hover-Effekt auf dem ganzen Item */
+.gallery-item:hover,
+.gallery-item:focus-within {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-strong);
 }
 
 .gallery-item img,
 .gallery-item video {
   width: 100%;
-  height: auto;     /* Höhe passt sich automatisch an das Seitenverhältnis an */
+  height: auto;
   display: block;
+  transition: transform 0.4s ease;
 }
 
+.gallery-item:hover img,
+.gallery-item:hover video {
+  transform: scale(1.05);
+}
+
+.gallery-item.small img { max-height: 200px; object-fit: cover; }
+.gallery-item.medium img { max-height: 300px; object-fit: cover; }
+.gallery-item.large img { max-height: 400px; object-fit: cover; }
+
+@media (min-width: 600px) {
+  .gallery-grid { column-count: 2; column-gap: 24px; }
+  .gallery-item { margin-bottom: 24px; }
+}
+@media (min-width: 900px) {
+  .gallery-grid { column-count: 3; column-gap: 28px; }
+  .gallery-item { margin-bottom: 28px; }
+}
+@media (min-width: 1200px) {
+  .gallery-grid { column-count: 4; column-gap: 32px; }
+  .gallery-item { margin-bottom: 32px; }
+}
 
 /* ==========================================================================
-   FAQ-Bereich
+   Call-to-Action Buttons
    ========================================================================== */
+.cta {
+  background: var(--brand);
+  display: grid;
+  place-items: center;
+  padding: 3.5rem 1.5rem;
+}
 
+.cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 520px;
+}
+
+.btn {
+  flex: 1 1 200px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 40px;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, var(--btn-grad-a), var(--btn-grad-b));
+  box-shadow: 0 10px 18px rgba(0,0,0,.15);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(0,0,0,.22);
+}
+
+.btn:active { transform: translateY(0) scale(0.98); }
+
+/* ==========================================================================
+   FAQ Abschnitt
+   ========================================================================== */
 .faq {
-  background-color: #f7b766; /* Konsistente Hintergrundfarbe */
+  background: var(--brand);
   display: flex;
   justify-content: center;
   padding: 4rem 1.5rem;
@@ -109,9 +298,8 @@ header {
 
 .faq h2 {
   font-size: clamp(1.8rem, 4vw, 2.5rem);
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #222;
+  margin: 0 0 1rem;
+  color: var(--text);
 }
 
 .faq p {
@@ -120,27 +308,30 @@ header {
   margin-bottom: 1rem;
 }
 
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.site-footer {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: var(--bg-page);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.site-footer p { margin: 0.3rem 0; }
+.site-footer a { text-decoration: underline; text-underline-offset: 3px; }
+.site-footer a:hover { opacity: .8; }
 
 /* ==========================================================================
-   Mobile Anpassungen (Responsive) - NEUE, GRÖSSERE BILDER
+   Reduced Motion
    ========================================================================== */
-
-/* Standard für kleine Bildschirme (Mobile) ist jetzt EINE Spalte */
-.gallery-grid {
-  column-count: 1; 
-  column-gap: 1rem;
-}
-
-/* Mittlere Bildschirme (Tablets) */
-@media (min-width: 600px) {
-  .gallery-grid {
-    column-count: 2; /* 2 Spalten statt 3 */
-  }
-}
-
-/* Große Bildschirme (Desktops) */
-@media (min-width: 1024px) {
-  .gallery-grid {
-    column-count: 3; /* 3 Spalten statt 4 - das macht einen großen Unterschied! */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .gallery-item:hover,
+  .gallery-item:hover img,
+  .gallery-item:hover video,
+  .btn:hover,
+  .btn:active {
+    transform: none !important;
   }
 }
