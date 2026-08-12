@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
       toggle.setAttribute("aria-busy", "false");
       toggle.setAttribute("aria-disabled", "true");
       status.textContent = "You are a robot";
+
+      document.dispatchEvent(new CustomEvent("robot-detected"));
     }, LOADING_DURATION_MS);
   }
 
