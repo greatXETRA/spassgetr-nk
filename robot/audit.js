@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // den Key serverseitig hält.
   // ---------------------------------------------------------------------
   const API_KEY = "AQ.Ab8RN6KJyAgcV62PtOSerzlbY-uEbjWaJ4Tfm7mWTMg9JQPR7A";
-  const GEMINI_MODEL = "gemini-3.6-flash"; // Stand Aug. 2026 – Google rotiert Modellnamen, ggf. auf ai.google.dev/gemini-api/docs/models prüfen
+  const GEMINI_MODEL = "gemini-2.5-flash"; // Stand Aug. 2026 – Google rotiert Modellnamen, ggf. auf ai.google.dev/gemini-api/docs/models prüfen
   const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
   const REQUEST_TIMEOUT_MS = 15000;
 
