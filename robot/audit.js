@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function hasUsableKey() {
-    return typeof API_KEY === "string" && API_KEY.trim() !== "" && API_KEY !== "DEIN_GEMINI_API_KEY_HIER";
+    return typeof API_KEY === "string" && API_KEY.trim() !== "" && API_KEY !== "AQ.Ab8RN6KJyAgcV62PtOSerzlbY-uEbjWaJ4Tfm7mWTMg9JQPR7A";
   }
 
   async function callGemini(systemText, userText, schema) {
