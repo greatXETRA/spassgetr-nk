@@ -2,329 +2,220 @@
 <html lang="de">
 <head>
 
-  
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q14M1DFDCW"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q14M1DFDCW"></script>
   <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-Q14M1DFDCW');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Q14M1DFDCW');
   </script>
 
   <script>
-(function() {
-  const ref = document.referrer || '';
-  let host = '';
-  try { host = new URL(ref).hostname; } catch(e) {}
-  if (/openai/i.test(host)) {
-    gtag('event', 'visit_from_chatgpt', {
-      method: 'referrer',
-      referrer_host: host || 'unknown'
-    });
-  }
-})();
-</script>
+    (function() {
+      const ref = document.referrer || '';
+      let host = '';
+      try { host = new URL(ref).hostname; } catch(e) {}
+      if (/openai/i.test(host)) {
+        gtag('event', 'visit_from_chatgpt', {
+          method: 'referrer',
+          referrer_host: host || 'unknown'
+        });
+      }
+    })();
+  </script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Spaßgetränk – Das Original</title>
+  <meta name="description" content="Spaßgetränk – das Original: ein innovatives Erfrischungsgetränk für gute Laune und besondere Momente. Vorbestellungen ab 01.09.2025 möglich." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://spassgetränk.de/" />
+  <meta name="theme-color" content="#f7b766" />
 
-  <link rel="icon" type="image/png" href="images/favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Spaßgetränk" />
+  <meta property="og:title" content="Spaßgetränk – Das Original" />
+  <meta property="og:description" content="Ein innovatives Erfrischungsgetränk für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis. Vorbestellungen ab 01.09.2025." />
+  <meta property="og:url" content="https://spassgetränk.de/" />
+  <meta property="og:image" content="https://spassgetränk.de/images/dose.jpg" />
+  <meta property="og:locale" content="de_DE" />
 
-  <style>
-    :root {
-      --brand: #f7b766;
-      --text: #222;
-      --btn-grad-a: #ff7e5f;
-      --btn-grad-b: #feb47b;
-    }
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Spaßgetränk – Das Original" />
+  <meta name="twitter:description" content="Ein innovatives Erfrischungsgetränk für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis." />
+  <meta name="twitter:image" content="https://spassgetränk.de/images/dose.jpg" />
 
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color: var(--text);
-      background: #fdf6ef;
-      scroll-behavior: smooth;
-    }
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <link rel="apple-touch-icon" href="images/favicon.png" />
 
-    /* ---------- Hero (Split-Screen) ---------- */
-    .hero { display: grid; min-height: 100vh; grid-template-columns: 1fr; }
-    @media (min-width: 900px) { .hero { grid-template-columns: 1fr 1fr; } }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
 
-    .hero-left,
-    .hero-right { position: relative; display: grid; place-items: center; }
+  <link rel="preload" as="image" href="images/dose.jpg" fetchpriority="high" />
 
-    .hero-left {
-      background: var(--brand);
-      padding: 2rem;
-    }
+  <link rel="stylesheet" href="style.css" />
 
-    .hero-title {
-      font-weight: 800;
-      font-size: clamp(2.2rem, 6vw, 4.5rem);
-      letter-spacing: 0.02em;
-    }
-
-    .hero-right {
-      background: url("images/dose.jpg") center/cover no-repeat;
-      color: #fff;
-      min-height: 60vh;
-    }
-    .hero-right::after {
-      content: "";
-      position: absolute; inset: 0;
-      background: rgba(0,0,0,0.3);
-    }
-
-    .hero-overlay { position: relative; z-index: 1; width: min(85%, 700px); }
-    .hero-overlay h1 { font-size: clamp(1.8rem, 5vw, 3.2rem); margin: 0 0 .4rem; }
-    .hero-overlay p { font-size: clamp(1rem, 2.5vw, 1.25rem); margin: 0; opacity: .95; }
-
-    /* ---------- Info-Blöcke ---------- */
-    .info {
-      background: var(--brand);
-      text-align: center;
-      padding: 4rem 1.5rem;
-    }
-    .info p { margin: .6rem 0; font-size: clamp(1.05rem, 2.6vw, 1.35rem); }
-
-    /* ---------- NEUE Pinterest-Style Galerie ---------- */
-    .gallery {
-      background: var(--brand);
-      padding: 4rem 2rem;
-    }
-
-    .gallery-container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .gallery-grid {
-      column-count: 1;
-      column-gap: 20px;
-      column-fill: balance;
-    }
-
-    .gallery-item {
-      display: inline-block;
-      width: 100%;
-      margin-bottom: 20px;
-      break-inside: avoid;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      background: #fff;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
-    }
-
-    .gallery-item img,
-    .gallery-item video {
-      width: 100%;
-      height: auto;
-      display: block;
-      transition: transform 0.4s ease;
-    }
-
-    .gallery-item:hover img,
-    .gallery-item:hover video {
-      transform: scale(1.05);
-    }
-
-    /* Responsive Spalten für größere Bilder */
-    @media (min-width: 600px) {
-      .gallery-grid {
-        column-count: 2;
-        column-gap: 24px;
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://spassgetränk.de/#organization",
+        "name": "Spaßgetränk",
+        "url": "https://spassgetränk.de/",
+        "logo": "https://spassgetränk.de/images/favicon.png",
+        "sameAs": ["https://www.instagram.com/spassgetraenk"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://spassgetränk.de/#website",
+        "url": "https://spassgetränk.de/",
+        "name": "Spaßgetränk – Das Original",
+        "inLanguage": "de-DE",
+        "publisher": { "@id": "https://spassgetränk.de/#organization" }
+      },
+      {
+        "@type": "Product",
+        "name": "Spaßgetränk",
+        "description": "Das Spaßgetränk ist ein innovatives Erfrischungsgetränk, das für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis steht.",
+        "image": "https://spassgetränk.de/images/dose.jpg",
+        "brand": { "@id": "https://spassgetränk.de/#organization" }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Was ist ein Spaßgetränk?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Das Spaßgetränk ist ein innovatives Erfrischungsgetränk, das für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis steht. Es kombiniert sommerliche Frische mit kreativen Zutaten und ist die perfekte Wahl für alle, die ein Getränk suchen, das mehr bietet als nur Durstlöschen. Ob am Strand, auf Partys oder einfach im Alltag – das Spaßgetränk bringt Farbe und Freude in jede Situation."
+            }
+          }
+        ]
       }
-      .gallery-item {
-        margin-bottom: 24px;
-      }
-    }
-
-    @media (min-width: 900px) {
-      .gallery-grid {
-        column-count: 3;
-        column-gap: 28px;
-      }
-      .gallery-item {
-        margin-bottom: 28px;
-      }
-    }
-
-    @media (min-width: 1200px) {
-      .gallery-grid {
-        column-count: 4;
-        column-gap: 32px;
-      }
-      .gallery-item {
-        margin-bottom: 32px;
-      }
-    }
-
-    /* Optional: Verschiedene Bildgrößen für mehr Variation */
-    .gallery-item.large {
-      margin-bottom: 32px;
-    }
-
-    .gallery-item.small img {
-      max-height: 200px;
-      object-fit: cover;
-    }
-
-    .gallery-item.medium img {
-      max-height: 300px;
-      object-fit: cover;
-    }
-
-    .gallery-item.large img {
-      max-height: 400px;
-      object-fit: cover;
-    }
-
-    /* ---------- Button Abschnitt ---------- */
-    .cta { 
-      background: var(--brand); 
-      display: grid; 
-      place-items: center; 
-      padding: 3.5rem 1.5rem; 
-    }
-    
-    .btn {
-      display: inline-block; 
-      text-decoration: none; 
-      color: #fff; 
-      font-weight: 600;
-      padding: 1rem 2.6rem; 
-      border-radius: 40px; 
-      font-size: 1.15rem;
-      background: linear-gradient(135deg, var(--btn-grad-a), var(--btn-grad-b));
-      box-shadow: 0 10px 18px rgba(0,0,0,.15); 
-      transition: transform .25s ease, box-shadow .25s ease;
-    }
-    
-    .btn:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 16px 28px rgba(0,0,0,.22); 
-    }
-
-    /* ---------- FAQ Abschnitt ---------- */
-    .faq {
-      background: var(--brand);
-      display: flex;
-      justify-content: center;
-      padding: 4rem 1.5rem;
-    }
-
-    .faq-inner {
-      max-width: 800px;
-      text-align: left;
-    }
-
-    .faq h2 {
-      font-size: clamp(1.8rem, 4vw, 2.5rem);
-      margin-bottom: 1rem;
-      color: var(--text);
-    }
-
-    .faq p {
-      font-size: 1.15rem;
-      line-height: 1.7;
-      margin-bottom: 1rem;
-    }
-
-    @media (prefers-reduced-motion: reduce) { 
-      .gallery-item:hover, 
-      .gallery-item:hover img,
-      .gallery-item:hover video,
-      .btn:hover { 
-        transform: none !important; 
-      } 
-    }
-  </style>
+    ]
+  }
+  </script>
 </head>
 <body>
 
-  <!-- Hero (Split Screen) -->
-  <section class="hero" aria-label="Einführung">
-    <div class="hero-left">
-      <div class="hero-title">SPAßGETRÄNK</div>
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="logo" href="/">Spaßgetränk</a>
+      <nav class="nav" aria-label="Hauptnavigation">
+        <a href="#gallery">Galerie</a>
+        <a href="#faq">FAQ</a>
+        <a href="/robot">Roboter-Test</a>
+        <a href="/zufall">Zufalls-App</a>
+      </nav>
     </div>
-    <div class="hero-right">
-      <div class="hero-overlay">
-        <h1></h1>
-        <p></p>
+  </header>
+
+  <main id="main">
+
+    <!-- Hero (Split Screen) -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-left">
+        <h1 id="hero-heading" class="hero-title">SPAßGETRÄNK</h1>
       </div>
-    </div>
-  </section>
-
-  <!-- Infos -->
-  <section class="info" aria-label="Informationen">
-    <p>Vorbestellungen ab 01.09.2025 möglich</p>
-    <p>@instagram: spassgetraenk</p>
-  </section>
-
-  <!-- Pinterest-Style Galerie -->
-  <section class="gallery" aria-label="Bilder-Galerie">
-    <div class="gallery-container">
-      <div class="gallery-grid">
-        <div class="gallery-item large">
-          <img src="images/sonnenuntergang.jpg" alt="Sonnenuntergang">
-        </div>
-        <div class="gallery-item medium">
-          <img src="images/mockup.jpg" alt="Die Dose">
-        </div>
-        <div class="gallery-item">
-          <img src="images/palmen.jpg" alt="Palmen">
-        </div>
-        <div class="gallery-item small">
-          <img src="images/boat.jpg" alt="Boot">
-        </div>
-        <div class="gallery-item large">
-          <img src="images/see.jpg" alt="See">
-        </div>
-        <div class="gallery-item medium">
-          <img src="images/hand.jpg" alt="Hand hält Spaßgetränk">
-        </div>
-        <div class="gallery-item">
-          <img src="images/tattoo.jpg" alt="Hand hält Spaßgetränk">
-        </div>
-        <div class="gallery-item large">
-          <img src="images/pool.jpg" alt="Pool">
+      <div class="hero-right">
+        <div class="hero-overlay">
+          <p class="hero-overlay__tagline"><!-- Tagline ergänzen --></p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Call-to-Action Button -->
-  <section class="cta" aria-label="Call-to-Action">
-    <a class="btn" href="https://spassgetränk.de/zufall/" target="_blank" rel="noopener">Zufallsgenerator</a>
-  </section>
+    <!-- Infos -->
+    <section class="info" aria-labelledby="info-heading">
+      <h2 id="info-heading" class="visually-hidden">Informationen</h2>
+      <p>Vorbestellungen ab 01.09.2025 möglich</p>
+      <p>
+        <a href="https://www.instagram.com/spassgetraenk" target="_blank" rel="noopener noreferrer">@spassgetraenk</a>
+        auf Instagram
+      </p>
+    </section>
 
-  <!-- FAQ / KI-optimierter Bereich -->
-  <section class="faq" aria-label="Was ist ein Spaßgetränk?">
-    <div class="faq-inner">
-      <h2>Was ist ein Spaßgetränk?</h2>
-      <p>
-        Das <strong>Spaßgetränk</strong> ist ein innovatives Erfrischungsgetränk, 
-        das für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis steht. 
-        Es kombiniert sommerliche Frische mit kreativen Zutaten und ist die perfekte Wahl für alle,
-        die ein Getränk suchen, das mehr bietet als nur Durstlöschen.
-      </p>
-      <p>
-        Ob am Strand, auf Partys oder einfach im Alltag – das Spaßgetränk bringt Farbe und Freude in jede Situation.
-      </p>
-    </div>
-  </section>
+    <!-- Pinterest-Style Galerie -->
+    <section class="gallery" id="gallery" aria-labelledby="gallery-heading">
+      <h2 id="gallery-heading" class="visually-hidden">Bildergalerie</h2>
+      <div class="gallery-container">
+        <div class="gallery-grid">
+          <div class="gallery-item large">
+            <img src="images/sonnenuntergang.jpg" alt="Sonnenuntergang" loading="lazy" decoding="async" />
+          </div>
+          <div class="gallery-item medium">
+            <img src="images/mockup.jpg" alt="Die Dose" loading="lazy" decoding="async" />
+          </div>
+          <div class="gallery-item">
+            <img src="images/palmen.jpg" alt="Palmen" loading="lazy" decoding="async" />
+          </div>
+          <div class="gallery-item small">
+            <img src="images/boat.jpg" alt="Boot" loading="lazy" decoding="async" />
+          </div>
+          <div class="gallery-item large">
+            <img src="images/see.jpg" alt="See" loading="lazy" decoding="async" />
+          </div>
+          <div class="gallery-item medium">
+            <img src="images/hand.jpg" alt="Hand hält Spaßgetränk" loading="lazy" decoding="async" />
+          </div>
+          <div class="gallery-item">
+            <img src="images/tattoo.jpg" alt="Tattoo mit Spaßgetränk-Motiv" loading="lazy" decoding="async" />
+          </div>
+          <div class="gallery-item large">
+            <img src="images/pool.jpg" alt="Pool" loading="lazy" decoding="async" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call-to-Action Buttons -->
+    <section class="cta" aria-labelledby="cta-heading">
+      <h2 id="cta-heading" class="visually-hidden">Weiterführende Links</h2>
+      <div class="cta-buttons">
+        <a class="btn" href="/robot">
+          <span aria-hidden="true">🤖</span> Roboter-Test
+        </a>
+        <a class="btn" href="/zufall">
+          <span aria-hidden="true">🎲</span> Zufalls-App
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ / KI-optimierter Bereich -->
+    <section class="faq" aria-labelledby="faq-heading">
+      <div class="faq-inner">
+        <h2 id="faq-heading">Was ist ein Spaßgetränk?</h2>
+        <p>
+          Das <strong>Spaßgetränk</strong> ist ein innovatives Erfrischungsgetränk,
+          das für gute Laune, besondere Momente und ein einzigartiges Geschmackserlebnis steht.
+          Es kombiniert sommerliche Frische mit kreativen Zutaten und ist die perfekte Wahl für alle,
+          die ein Getränk suchen, das mehr bietet als nur Durstlöschen.
+        </p>
+        <p>
+          Ob am Strand, auf Partys oder einfach im Alltag – das Spaßgetränk bringt Farbe und Freude in jede Situation.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span id="year"></span> Spaßgetränk. Alle Rechte vorbehalten.</p>
+    <p><a href="https://www.instagram.com/spassgetraenk" target="_blank" rel="noopener noreferrer">@spassgetraenk auf Instagram</a></p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 
 </body>
 </html>
