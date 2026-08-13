@@ -84,26 +84,74 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function callGemini(systemText, userText, schema) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-    try {
-      const response = await fetch(GEMINI_URL, {
+  try {
+    const response = await fetch(
+      `${GEMINI_URL}?key=${API_KEY}`,
+      {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": API_KEY
+          "Content-Type": "application/json"
         },
         signal: controller.signal,
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemText }] },
-          contents: [{ role: "user", parts: [{ text: userText }] }],
+          systemInstruction: {
+            parts: [{ text: systemText }]
+          },
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: userText }]
+            }
+          ],
           generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: schema
+            responseMimeType: "application/json"
           }
         })
-      });
+      }
+    );
+
+    const responseText = await response.text();
+
+    console.log("Gemini HTTP Status:", response.status);
+    console.log("Gemini Raw Response:", responseText);
+
+    if (!response.ok) {
+      throw new Error(
+        `HTTP ${response.status}: ${responseText}`
+      );
+    }
+
+    const data = JSON.parse(responseText);
+
+    console.log("Gemini Parsed Response:", data);
+
+    const raw =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!raw) {
+      throw new Error("Keine Textantwort gefunden");
+    }
+
+    console.log("Gemini Content:", raw);
+
+    try {
+      return JSON.parse(raw);
+    } catch {
+      console.warn("Antwort war kein JSON:");
+
+      return {
+        question: raw,
+        verdict: "human",
+        comment: raw
+      };
+    }
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
       if (!response.ok) {
         // z.B. 400 (ungültiger Key), 403 (Referrer-Sperre), 429 (Limit erreicht)
