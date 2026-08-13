@@ -10,28 +10,35 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!auditSection || !form) return; // Audit-Bereich nicht auf dieser Seite vorhanden
 
   // ---------------------------------------------------------------------
-  // Puter.js – kein API-Key nötig. puter.ai.chat() läuft komplett
-  // client-seitig; Puter übernimmt Modell-Routing und Abrechnung nach dem
-  // "User-Pays"-Modell (nicht dein Kontingent, sondern das der besuchenden
-  // Person, sofern sie bei Puter eingeloggt ist / andernfalls ein
-  // begrenztes Gast-Kontingent). Voraussetzung: das <script
-  // src="https://js.puter.com/v2/"> im <head> von index.html.
+  // Pollinations.ai – kein API-Key, keine Registrierung. Einfacher GET-
+  // Request an https://text.pollinations.ai/<encodierter Prompt>, die
+  // Antwort kommt als reiner Text zurück (kein JSON).
+  //
+  // Zu beachten: Der anonyme Zugang ist auf 1 Anfrage pro 15 Sekunden
+  // begrenzt. Für diesen Ablauf (Frage -> Nutzer tippt -> Antwort) reicht
+  // das normalerweise, aber wer sehr schnell antwortet, kann in seltenen
+  // Fällen ein 429 auslösen – dafür greift automatisch der Fallback unten.
+  // Pollinations filtert Inhalte nicht so streng wie ein "echter" Chat-
+  // Anbieter; die Prompts unten schließen Politik/Kontroverses zwar aus,
+  // eine Garantie für jede Antwort gibt es aber nicht – gelegentlich
+  // stichprobenartig prüfen, was ausgegeben wird.
   // ---------------------------------------------------------------------
-  const AI_MODEL = "gpt-5.4-nano"; // schnell & günstig genug für zwei kurze Scherz-Anfragen
+  const POLLINATIONS_BASE_URL = "https://text.pollinations.ai/";
+  const REQUEST_TIMEOUT_MS = 15000;
 
   const FALLBACK_QUESTIONS = [
+    "Wie schmeckt WD-40 auf einer Skala von 1 bis Maschinenöl?",
     "Wie viele Kilobyte passen in eine Kaffeetasse?",
     "Wenn ein Toaster traurig ist, welche Farbe hat sein Toast?",
     "Nenne eine Zahl, die nach Montag riecht.",
     "Wie oft muss man einen Algorithmus gießen, damit er wächst?",
     "Beschreibe das Geräusch, das eine Kartoffel beim Nachdenken macht.",
     "Wie viele Ecken hat ein rundes Gefühl?",
-    "Was sagt eine Steckdose, wenn sie Geburtstag hat?",
-    "Wie schwer ist ein Gedanke, den man schon vergessen hat?"
+    "Was sagt eine Steckdose, wenn sie Geburtstag hat?"
   ];
 
   const FALLBACK_EVAL_TEXT =
-    "Unser Prüf-Server hatte selbst gerade einen Roboter-Moment (Puter.js nicht erreichbar oder Limit erreicht) – wir werten das vorsichtshalber zu deinen Ungunsten. 🤖";
+    "Unser Prüf-Server hatte selbst gerade einen Roboter-Moment (Pollinations nicht erreichbar oder Limit erreicht) – wir werten das vorsichtshalber zu deinen Ungunsten. 🤖";
 
   let currentQuestion = "";
   let requestInFlight = false;
@@ -40,7 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return FALLBACK_QUESTIONS[Math.floor(Math.random() * FALLBACK_QUESTIONS.length)];
   }
 
-  // Manche Modelle umschließen kurze Antworten mit Anführungszeichen – die entfernen wir kosmetisch.
+  // Manche Modelle umschließen kurze Antworten mit Anführungszeichen oder hängen
+  // Zeilenumbrüche an – das entfernen wir rein kosmetisch.
   function cleanText(text) {
     return String(text || "")
       .trim()
@@ -48,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .trim();
   }
 
-  // Grobe, rein kosmetische Einschätzung fürs Farbschema des Ergebnisses.
   function guessVerdictClass(text) {
     const lower = text.toLowerCase();
     const mentionsHuman = lower.includes("mensch");
@@ -56,19 +63,33 @@ document.addEventListener("DOMContentLoaded", () => {
     return mentionsHuman && !mentionsRobot ? "human" : "robot";
   }
 
-  async function generateQuestion() {
-    if (typeof puter === "undefined" || !puter.ai) {
-      return { question: pickFallbackQuestion(), isFallback: true };
-    }
+  async function callPollinations(prompt) {
+    const url = POLLINATIONS_BASE_URL + encodeURIComponent(prompt);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
     try {
-      const response = await puter.ai.chat(
-        "Stelle eine ganz kurze, lustige Fangfrage (max. 1 Satz), um zu testen, ob der Nutzer ein " +
-          "Roboter ist. Antworte ausschließlich auf Deutsch, ohne Anführungszeichen, ohne zusätzlichen " +
-          "Text und ohne jegliche politischen oder anderweitig kontroversen Themen.",
-        { model: AI_MODEL }
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) {
+        // z.B. 429 = Rate-Limit (anonym: 1 Anfrage / 15s), 5xx = Serverfehler
+        throw new Error("pollinations-http-" + response.status);
+      }
+      const text = await response.text();
+      const cleaned = cleanText(text);
+      if (!cleaned) throw new Error("pollinations-empty-response");
+      return cleaned;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  async function generateQuestion() {
+    try {
+      const text = await callPollinations(
+        "Stelle eine ganz kurze, lustige und verrückte Fangfrage (max. 1 Satz), um zu testen, ob der " +
+          "Nutzer ein Roboter ist. Antworte ausschließlich auf Deutsch, ohne Anführungszeichen, ohne " +
+          "zusätzlichen Text und ohne jegliche politischen oder anderweitig kontroversen Themen."
       );
-      const text = cleanText(response && response.message && response.message.content);
-      if (!text) throw new Error("puter-empty-response");
       return { question: text, isFallback: false };
     } catch (err) {
       console.warn("Bot-Audit: Frage konnte nicht generiert werden, nutze Fallback.", err);
@@ -77,19 +98,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function evaluateAnswer(question, answer) {
-    if (typeof puter === "undefined" || !puter.ai) {
-      return { text: FALLBACK_EVAL_TEXT, isFallback: true };
-    }
     try {
       const prompt =
-        'Testfrage: "' + question + '"\n' +
-        'Antwort des Nutzers: "' + answer + '"\n\n' +
-        "Bewerte in genau 2 humorvollen Sätzen, ob diese Antwort eher von einem echten Roboter oder " +
-        "einem Menschen stammt. Antworte ausschließlich auf Deutsch, ohne Anführungszeichen, ohne " +
-        "zusätzlichen Text davor oder danach und ohne politische oder anderweitig kontroverse Themen.";
-      const response = await puter.ai.chat(prompt, { model: AI_MODEL });
-      const text = cleanText(response && response.message && response.message.content);
-      if (!text) throw new Error("puter-empty-response");
+        "Frage: " + question + ". Nutzer antwortet: " + answer + ". Bewerte in 2 humorvollen Sätzen, " +
+        "ob das ein Roboter oder Mensch war. Antworte ausschließlich auf Deutsch, ohne Anführungszeichen " +
+        "und ohne politische oder anderweitig kontroverse Themen.";
+      const text = await callPollinations(prompt);
       return { text, isFallback: false };
     } catch (err) {
       console.warn("Bot-Audit: Antwort konnte nicht bewertet werden, nutze Fallback.", err);
